@@ -13,6 +13,6 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 
 ## Regras
 - L/t = litros ÷ toneladas, só colhedoras com abastecimento e pesagem. Meta 1,00 L/t.
-- Motor ocioso = estado PARADA com motor ligado (monit). Nas colhedoras 850 RPM é a marcha lenta real. Meta 10% das horas de motor ligado.
+- Motor ocioso = estado PARADA com motor ligado (monit). Cada parada (sequência contínua de leituras paradas com motor ligado) tem 90 segundos descontados; paradas de até 90 s não contam. Nas colhedoras 850 RPM é a marcha lenta real. Meta 10% das horas de motor ligado.
 - Horas = motor ligado no monit; sem monit, horímetro do abastecimento.
 - Turnos: A 07–15h, B 15–23h, C 23–07h.
