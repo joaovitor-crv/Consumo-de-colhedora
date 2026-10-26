@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Consumo Combustível Colhedoras CRV</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+body{margin:0}
+/* Layout: réplica do painel Power BI — faixa de KPIs no topo, 3 colunas (tabela | ocioso+km/L+consumo | RPM+excessos) */
+:root{
+  --bg:#eef0f4; --card:#ffffff; --line:#d9dde6; --ink:#1d2433; --muted:#5b6475;
+  --navy:#22378c; --navy-2:#2a44a8; --green:#2e7d32; --red:#d64550; --yellow:#d9b51f; --gray:#6b6b6b;
+  --ton:#e8edfb; --font:"Segoe UI","Segoe UI Web",Tahoma,Arial,sans-serif;
+  color-scheme:light;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--font)}
+.pg{padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1500px;margin:0 auto;display:flex;flex-direction:column;gap:10px}
+.top{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:stretch}
+.logo{background:var(--card);border-radius:8px;display:flex;align-items:center;justify-content:center;padding:6px 10px}
+.logo-box{border:2px solid var(--navy);border-radius:6px;padding:4px 12px;text-align:center;line-height:1}
+.logo-box b{display:block;color:var(--navy);font-size:20px;letter-spacing:.02em;font-weight:800}
+.logo-box small{display:block;color:var(--navy);font-size:8px;font-style:italic;text-align:right;margin-top:2px}
+.hdr{display:flex;flex-direction:column;gap:6px;min-width:0}
+.hdr-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hdr h1{margin:0;color:var(--navy);font-size:13px;font-weight:700;letter-spacing:.01em;text-transform:uppercase}
+.periodo{background:#111;color:#fff;font-weight:700;font-style:italic;font-size:12px;padding:3px 16px;border-radius:4px;white-space:nowrap}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.kpi{background:var(--card);border-radius:8px;display:flex;align-items:center;gap:8px;padding:6px 8px;min-width:0;box-shadow:0 1px 2px rgba(20,30,60,.06)}
+.kpi svg{flex:none;width:30px;height:30px}
+.kpi div{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;text-align:center}
+.kpi .v{font-weight:700;font-size:13px;color:var(--navy);white-space:nowrap;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12px;font-weight:600;color:var(--navy);white-space:nowrap}
+.kpi .v.gray{color:var(--gray)} .kpi .v.green{color:var(--green)} .kpi .v.red{color:var(--red)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,.82fr);gap:10px;align-items:start}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.card{background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 1px 2px rgba(20,30,60,.06);min-width:0}
+.card>h2{margin:0;background:var(--navy);color:#fff;text-align:center;font-size:12px;font-weight:600;padding:4px 8px;text-transform:uppercase;border-radius:10px 10px 0 0}
+.card>h3{margin:0;display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0;color:var(--navy);font-size:12px;font-weight:700;text-transform:uppercase}
+.card>h3 span{color:var(--red);font-size:12px}
+.cb{padding:8px 12px 10px}
+.tw{overflow:auto;max-height:760px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+.tv th{font-size:12px;font-weight:700;padding:8px 6px;text-align:center;border-bottom:1px solid #8a93a6;position:sticky;top:0;background:var(--card);z-index:1}
+.tv td{font-size:12px;padding:2px 6px;text-align:right;white-space:nowrap}
+.tv td:first-child{text-align:left;padding-left:14px;border-right:1px solid var(--navy)}
+.tv td.i{font-style:italic}
+.tv td.ton{background:var(--ton)}
+.tv tr.g td{font-weight:700;text-align:left;padding:8px 6px 2px;border-right:none}
+.tv td.kg{color:var(--muted)} .tv td.ky{color:var(--yellow)} .tv td.kr{color:var(--red)} .tv td.kgn{color:var(--green)}
+.chart{width:100%;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-family:var(--font);fill:var(--ink)}
+.split{display:grid;grid-template-columns:minmax(0,.55fr) minmax(0,1fr);gap:10px;align-items:start}
+.to{font-size:12px} .to th{font-weight:700;padding:4px 4px;border-bottom:1px solid #8a93a6;text-align:right;white-space:nowrap}
+.to th:first-child,.to td:first-child{text-align:left}
+.to td{padding:2px 4px;text-align:right;white-space:nowrap}
+.to-wrap{overflow-x:auto}
+.leg{display:flex;justify-content:center;gap:14px;font-size:12px;color:var(--ink);margin:4px 0}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.sub{margin:10px 0 0;color:var(--navy);font-size:12px;font-weight:700;text-transform:uppercase;text-align:center}
+.note{font-size:11px;color:var(--muted);margin:6px 0 0}
+.foot{font-size:11px;color:var(--muted);background:var(--card);border-radius:8px;padding:8px 12px}
+.foot ul{margin:4px 0 0;padding-left:18px;display:grid;gap:2px}
+.tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:4px 8px;font-size:12px;white-space:nowrap;z-index:5}
+@media (max-width:1250px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid .col:last-child{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+@media (max-width:820px){.top{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid,.grid .col:last-child{grid-template-columns:minmax(0,1fr);display:grid}.split{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="pg">
+  <div class="top">
+    <div class="logo"><div class="logo-box"><b>CRV INDUSTRIAL</b><small>Açúcar Etanol e Energia</small></div></div>
+    <div class="hdr">
+      <div class="hdr-row"><h1>Acompanhamento consumo de combustível - colhedoras</h1><span class="periodo" id="periodo"></span></div>
+      <div class="kpis" id="kpis"></div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="col">
+      <section class="card"><h2>Acompanhamento por colhedora</h2>
+        <div class="tw"><table class="tv"><thead><tr><th>Frotas</th><th>Litros</th><th>Horas</th><th>Toneladas</th><th>L/t</th><th>% Ocioso</th></tr></thead><tbody id="tab"></tbody></table></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card"><h2>Registros de motor ocioso</h2>
+        <div class="cb">
+          <div class="chart" id="c-ocfx"></div>
+          <div class="split">
+            <div class="chart" id="c-octop"></div>
+            <div>
+              <div class="to-wrap"><table class="to"><thead><tr><th>Frota</th><th>Data</th><th>Ligado (h)</th><th>Ocioso (h)</th><th>% Ocioso</th></tr></thead><tbody id="t-oc"></tbody></table></div>
+              <div class="leg"><span><i style="background:var(--navy)"></i>Motor Ocioso</span><span><i style="background:var(--green)"></i>Meta</span></div>
+              <div class="chart" id="c-ocdia"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="card"><h3>Evolução da média de consumo (litros por tonelada)</h3>
+        <div class="cb"><div class="leg"><span><i style="background:var(--navy)"></i>Média</span><span><i style="background:var(--green)"></i>Meta</span></div><div class="chart" id="c-lt"></div></div>
+      </section>
+      <section class="card"><h3>Consumo diário (litros) <span id="lit-media"></span></h3>
+        <div class="cb"><div class="chart" id="c-lit"></div></div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="card"><h3>Faixa de RPM do motor</h3>
+        <div class="cb"><div class="chart" id="c-rpm"></div></div>
+      </section>
+      <section class="card"><h2>Motor ocioso por motivo (horas)</h2>
+        <div class="cb">
+          <div class="chart" id="c-motivo"></div>
+          <h3 class="sub">Horas ociosas por turno</h3>
+          <div class="chart" id="c-turno" style="max-width:260px;margin:0 auto"></div>
+          <div class="leg"><b>Turno:</b><span><i style="background:var(--red)"></i>A</span><span><i style="background:var(--yellow)"></i>B</span><span><i style="background:var(--gray)"></i>C</span></div>
+        </div>
+      </section>
+      <section class="card"><h3>Toneladas colhidas por dia (mil t)</h3>
+        <div class="cb"><div class="chart" id="c-ton"></div></div>
+      </section>
+    </div>
+  </div>
+
+  <div class="foot"><b>Regras e observações</b>
+    <ul>
+      <li>Litros: abastecimento (postos 625xx e 225xx); toneladas: balança, peso líquido em kg (coluna M); horas, motor ocioso e RPM: monit.</li>
+      <li>L/t = litros ÷ toneladas, só com colhedoras que têm abastecimento e pesagem. Meta 1,00 L/t: verde até 1,00; cinza 1,01–1,15; amarelo 1,16–1,50; vermelho acima de 1,50.</li>
+      <li>Motor ocioso = estado PARADA com motor ligado (monit). Nas colhedoras, 850 RPM é a marcha lenta real e conta como motor ligado. % ocioso = horas ociosas ÷ horas de motor ligado; meta 10%.</li>
+      <li>Horas = motor ligado no monit; sem monit, horímetro do abastecimento.</li>
+      <li>Turnos: A 07–15h, B 15–23h, C 23–07h.</li>
+    </ul><ul id="notas"></ul>
+  </div>
+</div>
+
+<script>
+const D={"periodo": "12/10/2026 - 22/10/2026", "K": {"litros": 103060.19, "custo": 622411.405467, "frotas": 25, "ton": 99381.24, "lt": 1.0540540836692023, "meta": 1.0, "custo_t": 6.365748827503412, "horas_oc": 198.56388888888887, "pct_oc": 0.09696763671381409, "custo_oc": 3597.5606824999995}, "tabela": [{"grupo": "FRENTE 1", "linhas": [{"frota": 62503, "litros": 3462.26, "custo": 20909.626818, "horas": 82.94722222222222, "ton": 3056.177, "lt": 1.1328728669838168, "pct": 0.17069421653661965, "viagens": 92}, {"frota": 62511, "litros": 2116.89, "custo": 12784.533777, "horas": 51.299166666666665, "ton": 1435.247, "lt": 1.474930795883914, "pct": 0.05789567731769522, "viagens": 55}, {"frota": 62515, "litros": 4453.07, "custo": 26893.425651, "horas": 104.85166666666666, "ton": 2453.349, "lt": 1.8150984633657907, "pct": 0.14230420753127435, "viagens": 89}, {"frota": 62518, "litros": 5389.19, "custo": 32546.935167, "horas": 152.16611111111112, "ton": 3716.431, "lt": 1.4500982259592603, "pct": 0.08131647066984546, "viagens": 137}, {"frota": 62521, "litros": 5020.42, "custo": 30319.822505999997, "horas": 133.50861111111112, "ton": 3890.347, "lt": 1.2904812861166368, "pct": 0.08876248098853382, "viagens": 141}, {"frota": 62524, "litros": 4843.56, "custo": 29251.711907999997, "horas": 140.68305555555554, "ton": 5212.475, "lt": 0.9292246005976048, "pct": 0.13162171074065226, "viagens": 183}]}, {"grupo": "FRENTE 2", "linhas": [{"frota": 62510, "litros": 4465.79, "custo": 26970.245547, "horas": 140.12444444444444, "ton": 4995.437, "lt": 0.8939738405268648, "pct": 0.16923647234204517, "viagens": 167}, {"frota": 62512, "litros": 2804.54, "custo": 16937.458422, "horas": 80.12388888888889, "ton": 2400.8, "lt": 1.168168943685438, "pct": 0.2507713748847271, "viagens": 74}, {"frota": 62516, "litros": 3119.81, "custo": 18841.468533, "horas": 103.92361111111111, "ton": 3576.742, "lt": 0.8722491026750042, "pct": 0.10840494487136652, "viagens": 115}, {"frota": 62522, "litros": 5308.46, "custo": 32059.382478, "horas": 165.45027777777779, "ton": 6503.925, "lt": 0.8161932986619618, "pct": 0.10454970526559675, "viagens": 220}, {"frota": 62523, "litros": 5869.93, "custo": 35450.268249, "horas": 162.43583333333333, "ton": 7040.786, "lt": 0.8337037938661962, "pct": 0.08179640165603853, "viagens": 232}]}, {"grupo": "FRENTE 3", "linhas": [{"frota": 62505, "litros": 3181.27, "custo": 19212.643911, "horas": 100.89611111111111, "ton": 2269.83, "lt": 1.4015454901908955, "pct": 0.17496544850864199, "viagens": 85}, {"frota": 62514, "litros": 2929.06, "custo": 17689.472058, "horas": 76.7125, "ton": 1659.723, "lt": 1.7647884616890892, "pct": 0.062136766063766224, "viagens": 83}, {"frota": 62517, "litros": 3254.2, "custo": 19653.09006, "horas": 102.96972222222222, "ton": 1559.36, "lt": 2.086881797660579, "pct": 0.017518634118443663, "viagens": 73}, {"frota": 62525, "litros": 5795.91, "custo": 35003.239262999996, "horas": 144.10305555555556, "ton": 5806.086, "lt": 0.9982473563085354, "pct": 0.01222311964238556, "viagens": 174}, {"frota": 62528, "litros": 5729.02, "custo": 34599.270486, "horas": 161.1522222222222, "ton": 5369.308, "lt": 1.0669941079930598, "pct": 0.0606948571743762, "viagens": 187}]}, {"grupo": "FRENTE 5", "linhas": [{"frota": 62529, "litros": 5167.33, "custo": 31207.056069, "horas": 144.38611111111112, "ton": 6323.974, "lt": 0.8171017148394348, "pct": 0.01627387983608765, "viagens": 98}]}, {"grupo": "SEM TELEMETRIA", "linhas": [{"frota": 22510, "litros": 5844.49, "custo": 35296.628457, "horas": null, "ton": 6272.801, "lt": 0.931719338777047, "pct": null, "viagens": 172}, {"frota": 22525, "litros": 6099.01, "custo": 36833.751093, "horas": null, "ton": 7151.837, "lt": 0.8527892903599452, "pct": null, "viagens": 164}, {"frota": 46526, "litros": null, "custo": null, "horas": null, "ton": 8120.42, "lt": null, "pct": null, "viagens": 125}, {"frota": 62504, "litros": 5315.32, "custo": 32100.812076, "horas": 132.09999999999854, "ton": null, "lt": null, "pct": null, "viagens": null}, {"frota": 62513, "litros": 1551.03, "custo": 9367.135479, "horas": 35.70000000000073, "ton": null, "lt": null, "pct": null, "viagens": null}, {"frota": 62520, "litros": 1593.09, "custo": 9621.148437, "horas": 53.899999999999636, "ton": 427.841, "lt": 3.723556180917677, "pct": null, "viagens": 26}, {"frota": 62526, "litros": 5452.94, "custo": 32931.940542, "horas": 144.69999999999982, "ton": 6729.934, "lt": 0.8102516309966783, "pct": null, "viagens": 138}, {"frota": 62527, "litros": 4293.6, "custo": 25930.33848, "horas": 126.09999999999991, "ton": 3408.41, "lt": 1.259707605599092, "pct": null, "viagens": 126}]}], "oc_faixa": [{"l": "Até 10%", "v": 97}, {"l": "10 a 20%", "v": 48}, {"l": "20 a 30%", "v": 17}, {"l": "30 a 40%", "v": 8}, {"l": "40 a 50%", "v": 2}, {"l": "Acima de 50%", "v": 10}], "oc_top": [{"l": "62510", "v": 23.714166666666667}, {"l": "62512", "v": 20.092777777777776}, {"l": "62524", "v": 18.516944444444444}, {"l": "62505", "v": 17.653333333333332}, {"l": "62522", "v": 17.297777777777778}, {"l": "62515", "v": 14.920833333333333}, {"l": "62503", "v": 14.15861111111111}, {"l": "62523", "v": 13.286666666666667}, {"l": "62518", "v": 12.373611111111112}, {"l": "62521", "v": 11.850555555555555}], "oc_tab": [{"frota": 62510, "data": "14/10", "lig": 12.59, "oc": 3.853333333333333, "pct": 0.30606301297325916}, {"frota": 62510, "data": "20/10", "lig": 12.768055555555556, "oc": 3.1825, "pct": 0.24925486783422168}, {"frota": 62512, "data": "17/10", "lig": 10.36138888888889, "oc": 3.0483333333333333, "pct": 0.2942012278491193}, {"frota": 62510, "data": "13/10", "lig": 12.022777777777778, "oc": 3.0041666666666664, "pct": 0.2498729263897232}, {"frota": 62505, "data": "19/10", "lig": 12.652222222222223, "oc": 2.9788888888888887, "pct": 0.23544392728550098}], "oc_dia": [{"l": "12/10", "v": 0.07961879384273364}, {"l": "13/10", "v": 0.08611723582596632}, {"l": "14/10", "v": 0.1312461937437642}, {"l": "15/10", "v": 0.13972391293658376}, {"l": "16/10", "v": 0.1940608022564464}, {"l": "17/10", "v": 0.10446380929622003}, {"l": "18/10", "v": 0.07551658222872631}, {"l": "19/10", "v": 0.08942145429816387}, {"l": "20/10", "v": 0.07378246713979557}, {"l": "21/10", "v": 0.08899846086323208}, {"l": "22/10", "v": 0.09275781507128046}], "lt_dia": [{"l": "12/10", "v": 1.1335983253374167}, {"l": "13/10", "v": 1.29425408862175}, {"l": "14/10", "v": 0.9183053585747032}, {"l": "15/10", "v": 1.4680440685533906}, {"l": "16/10", "v": 0.8607135591996903}, {"l": "17/10", "v": 1.1871531030592406}, {"l": "18/10", "v": 1.0592212615287864}, {"l": "19/10", "v": 1.018887180793269}, {"l": "20/10", "v": 0.9148711072743804}, {"l": "21/10", "v": 0.9894416202410012}, {"l": "22/10", "v": 0.907783196201852}], "litros_dia": [{"l": "12/10", "v": 9443.98}, {"l": "13/10", "v": 13071.48}, {"l": "14/10", "v": 6607.28}, {"l": "15/10", "v": 6154.92}, {"l": "16/10", "v": 2751.44}, {"l": "17/10", "v": 9655.25}, {"l": "18/10", "v": 12045.789999999999}, {"l": "19/10", "v": 11818.619999999999}, {"l": "20/10", "v": 10605.38}, {"l": "21/10", "v": 11919.3}, {"l": "22/10", "v": 8986.75}], "ton_dia": [{"l": "12/10", "v": 7722.82}, {"l": "13/10", "v": 10053.26}, {"l": "14/10", "v": 7432.14}, {"l": "15/10", "v": 3974.22}, {"l": "16/10", "v": 3522.88}, {"l": "17/10", "v": 8720.34}, {"l": "18/10", "v": 11808.16}, {"l": "19/10", "v": 11852.7}, {"l": "20/10", "v": 11786.42}, {"l": "21/10", "v": 12268.46}, {"l": "22/10", "v": 10239.84}], "rpm": [{"l": "1 - 900 (lenta)", "v": 0.10323011578790157}, {"l": "901 - 1.500", "v": 0.07096531246401003}, {"l": "1.501 - 1.800", "v": 0.09404204458560624}, {"l": "1.801 - 2.000", "v": 0.3656752770440926}, {"l": "Acima de 2.000", "v": 0.3660872501183898}], "motivo": [{"l": "Sem Apontamento", "v": 72.82944444444445}, {"l": "Aguardando Transbordo", "v": 45.85805555555555}, {"l": "Manutencao Mecanica", "v": 36.992777777777775}, {"l": "Chuva Solo Umido", "v": 13.4925}, {"l": "Aguardando Manobra Transbordo", "v": 6.610277777777777}, {"l": "Troca De Turno", "v": 4.252222222222222}, {"l": "Abastecimento De Combustivel - Campo", "v": 3.298888888888889}, {"l": "Outros", "v": 15.229722222222222}], "oc_turno": [{"l": "A", "v": 73.79916666666666}, {"l": "B", "v": 71.60888888888888}, {"l": "C", "v": 53.155833333333334}], "meta_oc": 0.1, "notas": ["Colhedoras com abastecimento e sem pesagem no período: 62504, 62513. Com pesagem e sem abastecimento: 46526 (podem ser a mesma máquina com códigos diferentes). Elas ficam fora da média L/t.", "Sem telemetria (fora de ocioso e RPM; horas pelo horímetro do abastecimento quando houver): 22510, 22525, 46526, 62504, 62513, 62520, 62526, 62527.", "A balança foi até 25/10 e o abastecimento até 22/10: o painel usa 12 a 22/10 nas duas bases."]};
+const NF=d=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d}).format;
+const f0=NF(0),f1=NF(1),f2=NF(2),brl=v=>'R$ '+f2(v),pc=(v,d=2)=>NF(d)(v*100)+'%';
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!=null)e.textContent=text;parent&&parent.appendChild(e);return e}
+function svg(box,w,h){box.replaceChildren();return el('svg',{viewBox:`0 0 ${w} ${h}`},box)}
+function tip(box){let t=box.querySelector('.tip');if(!t){t=document.createElement('div');t.className='tip';t.hidden=true;box.appendChild(t)}
+ return (ev,txt)=>{if(!ev){t.hidden=true;return}t.textContent=txt;t.hidden=false;const r=box.getBoundingClientRect();let x=ev.clientX-r.left+10;if(x+t.offsetWidth>r.width)x=r.width-t.offsetWidth;t.style.left=x+'px';t.style.top=(ev.clientY-r.top-30)+'px'}}
+function hover(node,box,txt){const T=tip(box);node.addEventListener('mousemove',e=>T(e,txt));node.addEventListener('mouseleave',()=>T())}
+
+/* ícones */
+const IC={
+ bomba:'<rect x="5" y="5" width="13" height="21" rx="2" fill="#d64550"/><rect x="8" y="8" width="7" height="5" fill="#fff"/><path d="M18 10h3l2 3v9a2 2 0 0 1-4 0v-5h-1" fill="none" stroke="#d64550" stroke-width="2"/><rect x="3" y="25" width="17" height="3" fill="#8a1f28"/>',
+ saco:'<path d="M11 6h8l-2 4h-4z" fill="#b8860b"/><path d="M8 13c0-3 4-4 7-4s7 1 7 4c3 4 4 8 2 11-1 2-4 3-9 3s-8-1-9-3c-2-3-1-7 2-11z" fill="#e0a526"/><text x="15" y="23" font-size="9" text-anchor="middle" fill="#fff" font-weight="700">$</text>',
+ caminhao:'<rect x="2" y="9" width="17" height="11" rx="1" fill="#e8eaee" stroke="#555" stroke-width="1.2"/><path d="M19 12h5l4 4v4h-9z" fill="#2e7d32"/><circle cx="7" cy="22" r="3" fill="#333"/><circle cx="23" cy="22" r="3" fill="#333"/>',
+ estrada:'<rect x="1" y="3" width="28" height="24" rx="3" fill="#2e8b57"/><path d="M11 27l3-24h2l3 24z" fill="#555"/><path d="M15 6v4M15 13v4M15 20v4" stroke="#fff" stroke-width="1.2"/><rect x="1" y="3" width="28" height="9" rx="3" fill="#4aa3df" opacity=".6"/>',
+ grafico:'<rect x="2" y="3" width="26" height="24" rx="2" fill="#e6efff" stroke="#9db6e8"/><path d="M5 22l6-6 5 4 9-11" fill="none" stroke="#3a6fd8" stroke-width="2.2" stroke-linecap="round"/>',
+ alvo:'<circle cx="14" cy="16" r="11" fill="#d64550"/><circle cx="14" cy="16" r="7.5" fill="#fff"/><circle cx="14" cy="16" r="4" fill="#d64550"/><path d="M14 16L27 4" stroke="#22378c" stroke-width="2"/><path d="M24 3l4 0-1 4" fill="#22378c"/>',
+ dolar:'<text x="15" y="25" font-size="26" text-anchor="middle" fill="#2e9e4f" font-weight="800">$</text>',
+ raio:'<path d="M17 2L6 17h7l-3 12 13-17h-8z" fill="#f08a24"/>',
+ dinheiro:'<g transform="rotate(-25 15 15)"><rect x="3" y="9" width="22" height="13" rx="2" fill="#3aa35a"/><circle cx="14" cy="15.5" r="3.5" fill="#bfe8c9"/></g><circle cx="22" cy="22" r="5" fill="#f2c230"/>'
+};
+const K=D.K;
+const kpis=[['bomba',f2(K.litros),'Litros Abast',''],['caminhao',f0(K.frotas),'Colhedoras',''],['estrada',f2(K.ton),'Toneladas',''],
+ ['grafico',f2(K.lt),'Média L/t','gray'],['alvo',f2(K.meta),'Meta L/t','green'],['raio',f1(K.horas_oc)+' h ('+pc(K.pct_oc,1)+')','Motor Ocioso','red']];
+document.getElementById('kpis').innerHTML=kpis.map(([i,v,l,c])=>`<div class="kpi"><svg viewBox="0 0 30 30" aria-hidden="true">${IC[i]}</svg><div><span class="v ${c}">${v}</span><span class="l">${l}</span></div></div>`).join('');
+document.getElementById('periodo').textContent='PERÍODO '+D.periodo;
+
+/* tabela */
+const kc=v=>v==null?'':(v<=K.meta?'kgn':(v<=1.15?'kg':(v<=1.5?'ky':'kr')));
+const tb=document.getElementById('tab');
+D.tabela.forEach(g=>{const r=tb.insertRow();r.className='g';const c=r.insertCell();c.colSpan=6;c.textContent=g.grupo;
+ g.linhas.forEach(x=>{const tr=tb.insertRow();const z=v=>v==null||v===0;
+  [[String(x.frota),''],[z(x.litros)?'':f0(x.litros),'i'],[z(x.horas)?'-':f1(x.horas),''],
+   [x.ton==null?'':f2(x.ton),'ton'],[x.lt==null?'':f2(x.lt),'i '+kc(x.lt)],[x.pct==null?'':pc(x.pct,1),x.pct!=null&&x.pct>D.meta_oc?'kr':'']]
+  .forEach(([t,cl])=>{const td=tr.insertCell();td.textContent=t;if(cl)td.className=cl})})});
+/* barras verticais com rótulo em cima (estilo Power BI) */
+function vbars(id,rows,opt){const box=document.getElementById(id);const W=opt.w||560,H=opt.h||150,top=26,bot=opt.bot||40;
+ const s=svg(box,W,H);const max=Math.max(...rows.map(r=>r.v),1);const n=rows.length;const slot=W/n;const bw=Math.min(opt.bw||60,slot*.55);
+ rows.forEach((r,i)=>{const cx=slot*i+slot/2;const h=Math.max(r.v>0?2:1,(H-top-bot)*r.v/max*(opt.scale||1));const y=H-bot-h;
+  const rc=el('rect',{x:cx-bw/2,y,width:bw,height:h,fill:opt.color?opt.color(r,i):'#22378c'},s);hover(rc,box,`${r.l}: ${opt.fmt(r.v)}`);
+  el('text',{x:cx,y:(opt.line?Math.min(y,H-bot-(H-top-bot)*opt.line/max):y)-7,'text-anchor':'middle','font-size':13,'font-weight':700},s,opt.fmt(r.v));
+  String(r.l).split('\n').forEach((ln,k)=>el('text',{x:cx,y:H-bot+16+k*14,'text-anchor':'middle','font-size':12},s,ln));});
+ if(opt.line){const yv=H-bot-(H-top-bot)*opt.line/max;el('line',{x1:slot*.3,x2:W-slot*.3,y1:yv,y2:yv,stroke:'#22378c','stroke-width':3},s)}}
+
+/* barras horizontais com valor à direita */
+function hbars(id,rows,opt){const box=document.getElementById(id);const W=opt.w||300,rh=opt.rh||23,lw=opt.lw||56,H=rows.length*rh+6;
+ const s=svg(box,W,H);const max=Math.max(...rows.map(r=>r.v),1e-9);const bwMax=W-lw-opt.vw;
+ rows.forEach((r,i)=>{const y=i*rh+3;const w=Math.max(2,bwMax*r.v/max);
+  el('text',{x:lw-8,y:y+rh/2+4,'text-anchor':'end','font-size':opt.fs||12},s,r.l);
+  const rc=el('rect',{x:lw,y:y+4,width:w,height:rh-9,fill:opt.color?opt.color(r,i):'#22378c'},s);hover(rc,box,`${r.l}: ${opt.fmt(r.v)}`);
+  el('text',{x:lw+w+6,y:y+rh/2+4,'font-size':opt.fs||12,'font-weight':opt.bold?700:400},s,opt.fmt(r.v));});}
+
+/* linha com meta */
+function linha(id,rows,meta,opt){const box=document.getElementById(id);const W=opt.w||560,H=opt.h||120,l=30,r=40,top=24,bot=26;
+ const s=svg(box,W,H);const n=rows.length;const xs=i=>n===1?(l+W-r)/2:l+(W-l-r)*i/(n-1);
+ const vals=rows.map(d=>d.v).concat([meta]);const lo=Math.min(...vals)*opt.lo,hi=Math.max(...vals)*opt.hi;const ys=v=>H-bot-(H-top-bot)*(v-lo)/(hi-lo);
+ if(opt.area&&n>1){el('path',{d:`M${xs(0)},${H-bot} `+rows.map((d,i)=>`L${xs(i)},${ys(d.v)}`).join(' ')+` L${xs(n-1)},${H-bot}Z`,fill:'#22378c',opacity:.35},s)}
+ if(opt.area&&n===1){el('rect',{x:xs(0)-30,y:ys(rows[0].v),width:60,height:H-bot-ys(rows[0].v),fill:'#22378c',opacity:.25},s)}
+ el('line',{x1:l,x2:W-r,y1:ys(meta),y2:ys(meta),stroke:'#2e7d32','stroke-width':3},s);
+ el('text',{x:W-r+4,y:ys(meta)-4,'font-size':12,'font-weight':700,fill:'#2e7d32'},s,opt.fmt(meta));
+ if(n>1)el('path',{d:rows.map((d,i)=>`${i?'L':'M'}${xs(i)},${ys(d.v)}`).join(' '),fill:'none',stroke:'#22378c','stroke-width':2.5,'stroke-dasharray':opt.area?'7 4':''},s);
+ rows.forEach((d,i)=>{const c=el('circle',{cx:xs(i),cy:ys(d.v),r:5,fill:'#22378c'},s);hover(c,box,`${d.l}: ${opt.fmt(d.v)}`);
+  el('circle',{cx:xs(i),cy:ys(meta),r:4,fill:'#2e7d32'},s);
+  el('text',{x:xs(i),y:opt.below?ys(d.v)+20:ys(d.v)-9,'text-anchor':'middle','font-size':13,'font-weight':700},s,opt.fmt(d.v));
+  el('text',{x:xs(i),y:H-4,'text-anchor':'middle','font-size':12},s,d.l);});}
+
+/* rosca de turnos */
+function rosca(id,rows){const box=document.getElementById(id);const W=240,H=190,cx=W/2,cy=H/2,R=70,ri=46;const s=svg(box,W,H);
+ const tot=rows.reduce((a,r)=>a+r.v,0)||1;const cor={A:'#d64550',B:'#d9b51f',C:'#6b6b6b'};let a0=-Math.PI/2+.0001;
+ rows.forEach(r=>{const a1=a0+2*Math.PI*r.v/tot;const big=a1-a0>Math.PI?1:0;const P=(rr,a)=>[cx+rr*Math.cos(a),cy+rr*Math.sin(a)];
+  const [x0,y0]=P(R,a0),[x1,y1]=P(R,a1),[x2,y2]=P(ri,a1),[x3,y3]=P(ri,a0);
+  const p=el('path',{d:`M${x0},${y0}A${R},${R} 0 ${big} 1 ${x1},${y1}L${x2},${y2}A${ri},${ri} 0 ${big} 0 ${x3},${y3}Z`,fill:cor[r.l],stroke:'#fff','stroke-width':2},s);
+  hover(p,box,`Turno ${r.l}: ${f1(r.v)} h ociosas`);
+  const am=(a0+a1)/2;const [lx,ly]=P(R+20,am);el('text',{x:lx,y:ly+4,'text-anchor':Math.cos(am)>0.2?'start':(Math.cos(am)<-0.2?'end':'middle'),'font-size':12,'font-weight':700},s,NF(0)(r.v/tot*100)+'%');a0=a1;});}
+
+/* motor ocioso */
+vbars('c-ocfx',D.oc_faixa.map(r=>({l:r.l.replace('Acima de 50%','Acima de\n50%'),v:r.v})),{w:600,h:150,fmt:f0,bw:40,bot:44});
+hbars('c-octop',D.oc_top,{w:230,vw:46,fmt:f1,lw:52});
+const to=document.getElementById('t-oc');D.oc_tab.forEach(r=>{const tr=to.insertRow();[String(r.frota),r.data,f2(r.lig),f2(r.oc),pc(r.pct)].forEach(t=>{tr.insertCell().textContent=t})});
+linha('c-ocdia',D.oc_dia,D.meta_oc,{w:380,h:120,fmt:v=>NF(0)(v*100)+'%',lo:0,hi:1.25,area:true});
+
+/* L/t e litros */
+linha('c-lt',D.lt_dia,K.meta,{w:600,h:110,fmt:f2,lo:.85,hi:1.08});
+const lm=D.litros_dia.reduce((a,r)=>a+r.v,0)/D.litros_dia.length;document.getElementById('lit-media').textContent=f0(lm);
+vbars('c-lit',D.litros_dia,{w:600,h:150,fmt:f0,bw:40,bot:28,line:lm,scale:.92,color:r=>r.v>lm?'#d64550':'#2e7d32'});
+
+/* RPM */
+hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:r=>r.l.startsWith('1 -')?'#d64550':(r.l.startsWith('1.801')||r.l.startsWith('Acima')?'#22378c':'#e8c95a')});
+
+/* motivos e turno */
+hbars('c-motivo',D.motivo.map(r=>({l:r.l.replace('Abastecimento De Combustivel - Campo','Abastecimento Campo').replace('Aguardando Manobra Transbordo','Aguard. Manobra Transb.').replace('Manutencao','Manutenção'),v:r.v})),{w:400,vw:46,lw:178,fmt:f1,bold:true,fs:11,color:r=>r.l==='Aguardando Transbordo'||r.l==='Sem Apontamento'?'#d64550':'#22378c'});
+rosca('c-turno',D.oc_turno);
+const tm=D.ton_dia.reduce((a,r)=>a+r.v,0)/D.ton_dia.length;
+vbars('c-ton',D.ton_dia,{w:400,h:150,fmt:v=>f1(v/1000)+'k',bw:24,bot:28,line:tm,scale:.92});
+(D.notas||[]).forEach(t=>{const li=document.createElement('li');li.textContent=t;document.getElementById('notas').appendChild(li)});
+</script>
+
+
+</body>
+</html>
