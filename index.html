@@ -78,6 +78,14 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
       <section class="card"><h2>Acompanhamento por colhedora</h2>
         <div class="tw"><table class="tv"><thead><tr><th>Frotas</th><th>Litros</th><th>Horas</th><th>L/h</th><th>Meta L/h</th><th>Toneladas</th><th>L/t</th><th>% Ocioso</th><th>Paradas</th></tr></thead><tbody id="tab"></tbody></table></div>
       </section>
+      <section class="card"><h2>Motor ocioso por motivo (horas)</h2>
+        <div class="cb">
+          <div class="chart" id="c-motivo"></div>
+          <h3 class="sub">Horas ociosas por turno</h3>
+          <div class="chart" id="c-turno" style="max-width:260px;margin:0 auto"></div>
+          <div class="leg"><b>Turno:</b><span><i style="background:var(--red)"></i>A</span><span><i style="background:var(--yellow)"></i>B</span><span><i style="background:var(--gray)"></i>C</span></div>
+        </div>
+      </section>
     </div>
 
     <div class="col">
@@ -112,14 +120,6 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
           <h3 class="sub">Top 10 colhedoras em excesso de RPM (acima de 2.000)</h3>
           <div class="chart" id="c-rpmtop"></div>
           <p class="note">% do tempo de motor ligado acima de 2.000 RPM. Entram colhedoras com pelo menos 5 h de motor ligado na semana.</p>
-        </div>
-      </section>
-      <section class="card"><h2>Motor ocioso por motivo (horas)</h2>
-        <div class="cb">
-          <div class="chart" id="c-motivo"></div>
-          <h3 class="sub">Horas ociosas por turno</h3>
-          <div class="chart" id="c-turno" style="max-width:260px;margin:0 auto"></div>
-          <div class="leg"><b>Turno:</b><span><i style="background:var(--red)"></i>A</span><span><i style="background:var(--yellow)"></i>B</span><span><i style="background:var(--gray)"></i>C</span></div>
         </div>
       </section>
       <section class="card"><h2>Motor ocioso por operador</h2>
