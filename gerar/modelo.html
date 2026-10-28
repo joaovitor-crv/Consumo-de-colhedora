@@ -139,7 +139,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         </div>
       </section>
       <section class="card"><h2>Motor ocioso por operador</h2>
-        <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Vermelho: acima da meta de 10%.</p></div>
+        <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Ao lado do nome: frente e colhedora em que mais trabalhou (+N = outras colhedoras; passe o mouse para ver todas). Vermelho: acima da meta de 10%.</p></div>
       </section>
       <section class="card" id="card-sem" hidden><h3>Com abastecimento, sem dados no Solinftec <span id="sem-n"></span></h3>
         <div class="cb"><div class="to-wrap"><table class="to"><thead><tr><th>Frota</th><th>Frente</th><th>Litros</th><th>Horas</th><th>L/h</th></tr></thead><tbody id="t-sem"></tbody></table></div>
@@ -262,6 +262,10 @@ function meta_bars(id,rows,o){const box=document.getElementById(id);const W=o.w,
   if(o.click)clicavel(s,box,0,y,W,rh,r,o.click,`${r.l}: ${pc(r.v,1)}`);});
  el('line',{x1:xm,x2:xm,y1:0,y2:rows.length*rh+6,stroke:'#22378c','stroke-width':2,'stroke-dasharray':'5 4'},s);
  el('text',{x:xm,y:rows.length*rh+18,'text-anchor':'middle','font-size':11,'font-weight':700,fill:'#22378c'},s,'meta 10%');}
+/* nome do operador com frente e máquina */
+const nomeCurto=s=>{const w=s.split(' ');return w.length>1?w[0]+' '+w[w.length-1]:w[0]};
+const maqTxt=r=>{const m=r.maq||[];if(!m.length)return '';const p=m[0];return ` · ${p.fr} · ${p.eq}${m.length>1?' +'+(m.length-1):''}`};
+const maqTip=r=>(r.maq||[]).map(m=>`${m.eq} (${m.fr}, ${f1(m.h)} h)`).join(', ');
 /* clique na colhedora: operadores */
 function clicavel(s,box,x,y,w,h,r,fn,txt){const a=el('rect',{x,y,width:w,height:h,fill:'transparent',style:'cursor:pointer'},s);
  a.addEventListener('click',()=>fn(r.l));const T=tip(box);a.addEventListener('mousemove',e=>T(e,`${txt} · clique para ver os operadores`));a.addEventListener('mouseleave',()=>T());}
@@ -284,7 +288,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')fecha()});
 meta_bars('c-ocfx',D.oc_frota,{w:600,lw:52,vw:52,rh:20,click:eq=>detalhe(eq,'oc')});
 hbars('c-octop',D.oc_top,{w:230,vw:46,fmt:f1,lw:52,click:eq=>detalhe(eq,'oc')});
 const to=document.getElementById('t-oc');D.longas.forEach(r=>{const tr=to.insertRow();[r.frota,f0(r.p10),f0(r.p30),f1(r.h10)].forEach(t=>{tr.insertCell().textContent=t})});
-meta_bars('c-op',D.oc_op.map(r=>({l:(w=>w.length>1?w[0]+' '+w[w.length-1]:w[0])(r.l.split(' ')),v:r.v,t:`${r.l} (${r.fr}): ${f1(r.oc)} h ociosas de ${f1(r.lig)} h ligado`})),{w:400,lw:150,vw:48,rh:24,fs:11});
+meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${f1(r.oc)} h ociosas de ${f1(r.lig)} h ligado · máquinas: ${maqTip(r)}`})),{w:460,lw:230,vw:48,rh:24,fs:11});
 linha('c-ocdia',D.oc_dia,D.meta_oc,{w:380,h:120,fmt:v=>NF(0)(v*100)+'%',lo:0,hi:1.25,area:true});
 
 /* L/t e litros */
@@ -303,7 +307,7 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:r=>r.
    if(w>30)el('text',{x:x+w/2,y:y+(rh-10)/2+4,'text-anchor':'middle','font-size':11,'font-weight':700,style:'fill:'+(k===3?'#1d2433':'#fff')},s,NF(0)(v*100)+'%');x+=w}});
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
- hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:(w=>w.length>1?w[0]+' '+w[w.length-1]:w[0])(r.l.split(' ')),v:r.v})),{w:600,vw:62,lw:170,rh:24,fmt:v=>pc(v,1),bold:true,fs:12,color:()=>'#d64550'});
+ hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v})),{w:600,vw:62,lw:250,rh:24,fmt:v=>pc(v,1),bold:true,fs:12,color:()=>'#d64550'});
  hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550',click:eq=>detalhe(eq,'rpm')});
 })();
 /* frotas sem Solinftec */

@@ -171,13 +171,20 @@ def calcular(rows, fim_dt):
     dias = sorted(lig_d, key=lambda s: (s[3:], s[:2]))
     mt = sorted(mot.items(), key=lambda x: -x[1]); outros = sum(v for _, v in mt[7:])
     tl = sum(rpm_b.values()) or 1
-    ops = [dict(l=o, v=op_o[o] / op_l[o], lig=op_l[o] / 3600, oc=op_o[o] / 3600,
+    eq_g = {eq: L[0]["g"] for eq, L in rows.items() if L}
+
+    def maquinas(o):
+        """Máquinas e frentes em que o operador trabalhou, da que teve mais horas de motor ligado para a que teve menos."""
+        m = [dict(eq=eq, fr=eq_g.get(eq, "").replace("FRENTE ", "F"), h=h / 3600) for (eq, op), h in ep_l.items() if op == o and h >= 900]
+        return sorted(m, key=lambda r: -r["h"])
+
+    ops = [dict(l=o, v=op_o[o] / op_l[o], lig=op_l[o] / 3600, oc=op_o[o] / 3600, maq=maquinas(o),
                 fr=", ".join(sorted(op_f[o])) if len(op_f[o]) <= 3 else f"{len(op_f[o])} colhedoras")
            for o in op_l if op_l[o] >= MIN_H]
     ops.sort(key=lambda x: -x["v"])
     rtop = [dict(l=e, v=v[BANDAS[4]] / sum(v.values())) for e, v in eq_rpm.items() if sum(v.values()) >= MIN_H]
     rtop.sort(key=lambda x: -x["v"])
-    otop = [dict(l=o, v=v[BANDAS[4]] / sum(v.values()), h=v[BANDAS[4]] / 3600, lig=sum(v.values()) / 3600,
+    otop = [dict(l=o, v=v[BANDAS[4]] / sum(v.values()), h=v[BANDAS[4]] / 3600, lig=sum(v.values()) / 3600, maq=maquinas(o),
                  fr=", ".join(sorted(op_f[o])) if len(op_f[o]) <= 3 else f"{len(op_f[o])} colhedoras")
             for o, v in op_rpm.items() if sum(v.values()) >= MIN_H]
     otop.sort(key=lambda x: -x["v"])
