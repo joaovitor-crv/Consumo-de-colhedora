@@ -17,3 +17,5 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 - Motor ocioso = estado PARADA com motor ligado (monit). Cada parada (sequência contínua de leituras paradas com motor ligado) tem 90 segundos descontados; paradas de até 90 s não contam. Nas colhedoras 850 RPM é a marcha lenta real. Meta 10% das horas de motor ligado.
 - Horas = horímetro do abastecimento: maior leitura do período − maior leitura do último dia de abastecimento antes do período.
 - Turnos: A 07–15h, B 15–23h, C 23–07h.
+- Paradas longas: paradas com motor ligado acima de 10 min e de 30 min, por colhedora.
+- Motor ocioso por operador: operador registrado no monit; só operadores com pelo menos 5 h de motor ligado.
