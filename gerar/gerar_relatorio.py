@@ -194,13 +194,14 @@ def main():
     rows, fim_dt = ler_monit(a.monit, frentes, ini, fim)
     M = calcular(rows, fim_dt)
 
-    tab, fr, sem = [], [], []
+    tab, fr, sem, sem_monit = [], [], [], []
     for f in frentes:
         linhas = []
         for x in grupos[f]:
             m = M["F"].get(str(x["frota"]))
             if not m:
                 sem.append(str(x["frota"]))
+                sem_monit.append(dict(frota=x["frota"], frente=f, litros=x["litros"], horas=x["horas"], lh=x["lh"]))
             linhas.append(dict(x, pct=m["pct"] if m else None, paradas=m["paradas"] if m else None))
         T = totais.get(f) or dict(
             horas=sum(x["horas"] or 0 for x in grupos[f]), litros=sum(x["litros"] or 0 for x in grupos[f]),
@@ -217,7 +218,7 @@ def main():
         K=dict(litros=TL, frotas=sum(len(g["linhas"]) for g in tab), ton=TT, lt=TL / TT if TT else 0, meta=META_LT,
                horas=TH, lh=TL / TH if TH else 0, meta_lh=META_LH, horas_oc=t["oc"], horas_oc_bruto=t["oc_bruto"],
                paradas=t["paradas"], paradas_90=t["paradas_90"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0),
-        tabela=tab, frentes=fr, meta_oc=META_OC,
+        tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit,
         **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "motivo", "oc_turno", "oc_op", "longas"]},
         notas=[
             f"Litros, horas, toneladas, L/h e L/t: coluna SEMANA ({ini[:5]} a {fim}) do Indicador de Consumo de Combustível — Colhedoras"

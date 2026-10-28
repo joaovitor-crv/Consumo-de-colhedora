@@ -125,6 +125,10 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
       <section class="card"><h2>Motor ocioso por operador</h2>
         <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Vermelho: acima da meta de 10%.</p></div>
       </section>
+      <section class="card" id="card-sem" hidden><h3>Com abastecimento, sem Solinftec <span id="sem-n"></span></h3>
+        <div class="cb"><div class="to-wrap"><table class="to"><thead><tr><th>Frota</th><th>Frente</th><th>Litros</th><th>Horas</th><th>L/h</th></tr></thead><tbody id="t-sem"></tbody></table></div>
+          <p class="note">Aparecem no relatório de abastecimento, mas sem telemetria (Solinftec/monit) na semana: ficam fora de motor ocioso, RPM e operadores.</p></div>
+      </section>
     </div>
   </div>
 
@@ -257,6 +261,9 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:r=>r.
  document.getElementById('leg-rpm').style.flexWrap='wrap';
  hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550'});
 })();
+/* frotas sem Solinftec */
+if((D.sem_monit||[]).length){document.getElementById('card-sem').hidden=false;document.getElementById('sem-n').textContent=D.sem_monit.length+' frotas';
+ const ts=document.getElementById('t-sem');D.sem_monit.forEach(r=>{const tr=ts.insertRow();[String(r.frota),'Frente '+r.frente,f0(r.litros||0),f1(r.horas||0),r.lh==null?'-':f2(r.lh)].forEach(t=>{tr.insertCell().textContent=t})})}
 /* motivos e turno */
 hbars('c-motivo',D.motivo.map(r=>({l:r.l.replace('Abastecimento De Combustivel - Campo','Abastecimento Campo').replace('Aguardando Manobra Transbordo','Aguard. Manobra Transb.').replace('Manutencao','Manutenção'),v:r.v})),{w:400,vw:46,lw:178,fmt:f1,bold:true,fs:11,color:r=>r.l==='Aguardando Transbordo'||r.l==='Sem Apontamento'?'#d64550':'#22378c'});
 rosca('c-turno',D.oc_turno);
