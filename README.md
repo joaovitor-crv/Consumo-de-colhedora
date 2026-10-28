@@ -20,3 +20,17 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 - Paradas longas: paradas com motor ligado acima de 10 min e de 30 min, por colhedora.
 - Motor ocioso por operador: operador registrado no monit; só operadores com pelo menos 5 h de motor ligado.
 - Faixa de RPM: % do tempo de motor ligado por faixa, geral e por frente. Excesso de RPM = acima de 2.000 (top 10 colhedoras).
+
+## Como gerar o relatório de uma nova semana
+1. Baixe o PDF do **Indicador Consumo de Combustível — Colhedoras** (a coluna SEMANA define o período) e as exportações do **monit** da mesma semana (CSV com `;`).
+2. Rode:
+   ```
+   python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv --frentes 1,2,3
+   ```
+3. O `index.html` é refeito com o layout padrão (`gerar/modelo.html`). Publique com commit e push.
+
+Precisa de Python 3 e `pdftotext` (poppler-utils). Para mudar o visual, edite `gerar/modelo.html` (os dados entram no lugar de `__DADOS__`).
+
+## Cores da faixa de RPM
+Vermelho: marcha lenta (até 900) e excesso (acima de 2.000). Tons de amarelo: 901–1.500, 1.501–1.800 e 1.801–2.000.
+
