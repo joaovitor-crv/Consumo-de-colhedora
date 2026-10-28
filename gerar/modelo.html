@@ -109,6 +109,10 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
       <section class="card"><h3>Litros por tonelada por frente</h3>
         <div class="cb"><div class="chart" id="c-lt"></div></div>
       </section>
+      <section class="card"><h3>Top 10 operadores em excesso de RPM (acima de 2.000)</h3>
+        <div class="cb"><div class="chart" id="c-rpmop"></div>
+          <p class="note">% do tempo de motor ligado acima de 2.000 RPM, pelo operador registrado no monit. Entram operadores com pelo menos 5 h de motor ligado na semana.</p></div>
+      </section>
     </div>
 
     <div class="col">
@@ -259,6 +263,7 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:r=>r.
    if(w>30)el('text',{x:x+w/2,y:y+(rh-10)/2+4,'text-anchor':'middle','font-size':11,'font-weight':700,style:'fill:'+(k===3?'#1d2433':'#fff')},s,NF(0)(v*100)+'%');x+=w}});
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
+ hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:(w=>w.length>1?w[0]+' '+w[w.length-1]:w[0])(r.l.split(' ')),v:r.v})),{w:600,vw:62,lw:170,rh:24,fmt:v=>pc(v,1),bold:true,fs:12,color:()=>'#d64550'});
  hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550'});
 })();
 /* frotas sem Solinftec */
