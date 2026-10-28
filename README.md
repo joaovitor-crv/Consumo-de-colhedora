@@ -19,3 +19,4 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 - Turnos: A 07–15h, B 15–23h, C 23–07h.
 - Paradas longas: paradas com motor ligado acima de 10 min e de 30 min, por colhedora.
 - Motor ocioso por operador: operador registrado no monit; só operadores com pelo menos 5 h de motor ligado.
+- Faixa de RPM: % do tempo de motor ligado por faixa, geral e por frente. Excesso de RPM = acima de 2.000 (top 10 colhedoras).
