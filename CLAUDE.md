@@ -3,13 +3,13 @@
 Ao gerar ou atualizar o relatório, use sempre o gerador. Não redesenhe a página à mão.
 
 ```
-python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MONIT2.csv> ...] --frentes 1,2,3
+python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MONIT2.csv> ...] --frentes 1,2,3,5,6
 ```
 
 ## Entradas
 - PDF "INDICADOR CONSUMO DE COMBUSTÍVEL — COLHEDORAS". A coluna SEMANA define o período e traz horas, diesel, L/h, toneladas e L/t por frota e por frente.
 - CSVs do monit (separados por `;`) da mesma semana.
-- Frentes padrão: 1, 2 e 3. Inclua outras só se o usuário pedir.
+- Frentes padrão: 1, 2, 3, 5 e 6 (frentes 5 e 6 incluídas a pedido do usuário em 28/10/2026).
 
 ## Padrão aprovado pelo usuário (28/10/2026)
 - **Layout** em `gerar/modelo.html`:

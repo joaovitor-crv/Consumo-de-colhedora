@@ -2,7 +2,7 @@
 
 Painel de acompanhamento do consumo de diesel das colhedoras com telemetria: litros por hora (L/h), litros por tonelada colhida (L/t), motor ocioso, faixa de RPM e motivos de parada.
 
-**Período atual:** 19/10/2026 a 25/10/2026 (frentes 1, 2 e 3)
+**Período atual:** 19/10/2026 a 25/10/2026 (frentes 1, 2, 3, 5 e 6)
 
 Abra o `index.html` ou acesse pelo GitHub Pages.
 
@@ -25,7 +25,7 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 1. Baixe o PDF do **Indicador Consumo de Combustível — Colhedoras** (a coluna SEMANA define o período) e as exportações do **monit** da mesma semana (CSV com `;`).
 2. Rode:
    ```
-   python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv --frentes 1,2,3
+   python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv --frentes 1,2,3,5,6
    ```
 3. O `index.html` é refeito com o layout padrão (`gerar/modelo.html`). Publique com commit e push.
 

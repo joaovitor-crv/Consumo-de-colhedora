@@ -74,6 +74,10 @@ def ler_pdf(caminho, frentes):
     falta = [f for f in frentes if f not in grupos]
     if falta:
         raise SystemExit(f"Frente(s) {falta} não encontrada(s) no PDF.")
+    m1 = re.search(r"(\d{5}(?:,\s*\d{5})*):\s*vieram", txt)
+    m2 = re.search(r"integrado só até (\d{2}/\d{2}/\d{4})", txt)
+    totais["_aviso"] = (f"Atenção (do indicador): {m1.group(1) if m1 else 'algumas frotas'} têm o abastecimento lançado à mão, "
+                        f"integrado só até {m2.group(1)}; o diesel da semana depois dessa data pode estar incompleto.") if m2 else None
     return ini, fim, (atual.group(1) if atual else ""), grupos, totais
 
 
@@ -181,7 +185,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pdf", required=True)
     ap.add_argument("--monit", required=True, nargs="+")
-    ap.add_argument("--frentes", default="1,2,3")
+    ap.add_argument("--frentes", default="1,2,3,5,6")
     ap.add_argument("--saida", default=os.path.join(AQUI, "..", "index.html"))
     a = ap.parse_args()
     frentes = [int(x) for x in a.frentes.split(",")]
@@ -220,6 +224,7 @@ def main():
             + (f", atualizado em {atualizado}" if atualizado else "") + f". Frentes {nf}.",
             f"Motor ocioso, paradas, RPM, motivos, turnos e operadores: monit de {ini[:5]} a {fim}."
             + (f" Sem telemetria nesse período: {', '.join(sem)} ({'aparece' if len(sem) == 1 else 'aparecem'} na tabela só com os dados de consumo)." if sem else ""),
+            *([totais["_aviso"]] if totais.get("_aviso") else []),
             f"Motor ocioso descontando 90 s de cada parada: {br(t['paradas'], 0)} paradas com motor ligado; "
             f"{br(t['paradas'] - t['paradas_90'], 0)} duraram até 90 s e não contam. Sem o desconto seriam {br(t['oc_bruto'], 1)} h; "
             f"com o desconto, {br(t['oc'], 1)} h.",
