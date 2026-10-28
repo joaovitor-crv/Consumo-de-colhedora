@@ -245,10 +245,10 @@ vbars('c-lt',D.frentes.map(r=>({l:r.l,v:r.lt})),{w:600,h:150,fmt:f2,bw:60,bot:28
 
 
 /* RPM */
-hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:r=>r.l.startsWith('1 -')||r.l.startsWith('Acima')?'#d64550':(r.l.startsWith('1.801')?'#d9b51f':(r.l.startsWith('901')?'#6f86d6':'#22378c'))});
+hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:r=>r.l.startsWith('1 -')?'#2e7d32':(r.l.startsWith('Acima')?'#d64550':(r.l.startsWith('1.801')?'#f2d98a':(r.l.startsWith('901')?'#6f86d6':'#22378c')))});
 
 /* RPM por frente (barras empilhadas) e top 10 em excesso */
-(()=>{const cores=['#d64550','#6f86d6','#22378c','#d9b51f','#d64550'];const nomes=['1-900','901-1.500','1.501-1.800','1.801-2.000','Acima de 2.000'];
+(()=>{const cores=['#2e7d32','#6f86d6','#22378c','#f2d98a','#d64550'];const nomes=['1-900','901-1.500','1.501-1.800','1.801-2.000','Acima de 2.000'];
  const box=document.getElementById('c-rpmfr');const W=400,rh=34,lw=62,H=D.rpm_frente.length*rh+4;const s=svg(box,W,H);const bw=W-lw-8;
  D.rpm_frente.forEach((r,i)=>{const y=i*rh+4;let x=lw;el('text',{x:lw-8,y:y+rh/2+2,'text-anchor':'end','font-size':12},s,r.l);
   for(let k=0;k<5;k++){const v=r['b'+k],w=bw*v;const rc=el('rect',{x,y,width:w,height:rh-10,fill:cores[k]},s);hover(rc,box,`${r.l} · ${nomes[k]}: ${pc(v,1)}`);

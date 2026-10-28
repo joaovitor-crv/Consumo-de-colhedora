@@ -32,5 +32,5 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 Precisa de Python 3 e `pdftotext` (poppler-utils). Para mudar o visual, edite `gerar/modelo.html` (os dados entram no lugar de `__DADOS__`).
 
 ## Cores da faixa de RPM
-Vermelho: marcha lenta (até 900) e excesso (acima de 2.000). Azul: faixa normal (901–1.500 azul claro, 1.501–1.800 azul). Amarelo: 1.801–2.000.
+Verde: marcha lenta (até 900). Azul: 901–1.500 (claro) e 1.501–1.800. Amarelo pastel: 1.801–2.000. Vermelho: excesso (acima de 2.000).
 
