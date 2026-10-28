@@ -2,7 +2,7 @@
 
 Painel de acompanhamento do consumo de diesel das colhedoras com telemetria: litros por hora (L/h), litros por tonelada colhida (L/t), motor ocioso, faixa de RPM e motivos de parada.
 
-**Período atual:** 19/10/2026 a 25/10/2026 (frentes 1, 2, 3 e 6)
+**Período atual:** 19/10/2026 a 25/10/2026 (frentes 1, 2 e 3)
 
 Abra o `index.html` ou acesse pelo GitHub Pages.
 
