@@ -114,6 +114,16 @@ def turno(t):
     return "A" if 7 <= t.hour < 15 else "B" if 15 <= t.hour < 23 else "C"
 
 
+def detalhe(ep_l, ep_o, ep_x):
+    """Por colhedora: operadores com motor ligado, ocioso e tempo acima de 2.000 RPM (para o clique nos rankings)."""
+    det = collections.defaultdict(list)
+    for (eq, op), lig in ep_l.items():
+        if lig < 900:  # menos de 15 min de motor ligado na colhedora: não entra
+            continue
+        det[eq].append(dict(op=op, lig=lig / 3600, oc=ep_o[(eq, op)] / 3600, x=ep_x[(eq, op)] / 3600))
+    return {eq: sorted(L, key=lambda r: -r["lig"]) for eq, L in det.items()}
+
+
 def calcular(rows, fim_dt):
     F = {}
     lig_d = collections.defaultdict(float); oc_d = collections.defaultdict(float)
@@ -122,6 +132,7 @@ def calcular(rows, fim_dt):
     fr_rpm = collections.defaultdict(lambda: collections.defaultdict(float))
     eq_rpm = collections.defaultdict(lambda: collections.defaultdict(float))
     op_rpm = collections.defaultdict(lambda: collections.defaultdict(float))
+    ep_l = collections.defaultdict(float); ep_o = collections.defaultdict(float); ep_x = collections.defaultdict(float)
     longas = {}
     tot = dict(paradas=0, paradas_90=0, oc_bruto=0.0)
     for eq, L in rows.items():
@@ -136,6 +147,8 @@ def calcular(rows, fim_dt):
                 rpm_b[banda(x["rpm"])] += x["d"]; fr_rpm[x["g"]][banda(x["rpm"])] += x["d"]
                 eq_rpm[eq][banda(x["rpm"])] += x["d"]; op_rpm[x["oper"]][banda(x["rpm"])] += x["d"]
                 op_l[x["oper"]] += x["d"]; op_f[x["oper"]].add(eq)
+                ep_l[(eq, x["oper"])] += x["d"]
+                if x["rpm"] > 2000: ep_x[(eq, x["oper"])] += x["d"]
         i = 0
         while i < len(L):  # paradas com motor ligado
             if L[i]["est"] == "PARADA" and L[i]["lig"]:
@@ -149,7 +162,7 @@ def calcular(rows, fim_dt):
                     tot["paradas_90"] += 1; k = (dur - DESCONTO) / dur
                     for s in L[i:j]:
                         v = s["d"] * k; oc += v
-                        oc_d[s["t"].strftime("%d/%m")] += v; mot[s["op"]] += v; tur[turno(s["t"])] += v; op_o[s["oper"]] += v
+                        oc_d[s["t"].strftime("%d/%m")] += v; mot[s["op"]] += v; tur[turno(s["t"])] += v; op_o[s["oper"]] += v; ep_o[(eq, s["oper"])] += v
                 i = j
             else:
                 i += 1
@@ -179,6 +192,7 @@ def calcular(rows, fim_dt):
                     for g in sorted(fr_rpm, key=lambda s: int(s.split()[-1]))],
         rpm_top=rtop[:10],
         rpm_op=otop[:10],
+        det=detalhe(ep_l, ep_o, ep_x),
         motivo=[dict(l=l, v=v / 3600) for l, v in mt[:7]] + ([dict(l="Outros", v=outros / 3600)] if outros else []),
         oc_turno=[dict(l=t, v=tur[t] / 3600) for t in "ABC"],
         oc_op=ops[:10],
@@ -225,7 +239,7 @@ def main():
                horas=TH, lh=TL / TH if TH else 0, meta_lh=META_LH, horas_oc=t["oc"], horas_oc_bruto=t["oc_bruto"],
                paradas=t["paradas"], paradas_90=t["paradas_90"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0),
         tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit,
-        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "motivo", "oc_turno", "oc_op", "longas"]},
+        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "oc_turno", "oc_op", "longas"]},
         notas=[
             f"Litros, horas, toneladas, L/h e L/t: coluna SEMANA ({ini[:5]} a {fim}) do Indicador de Consumo de Combustível — Colhedoras"
             + (f", atualizado em {atualizado}" if atualizado else "") + f". Frentes {nf}.",
