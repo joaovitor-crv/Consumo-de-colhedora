@@ -98,12 +98,6 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
           <div class="leg"><b>Turno:</b><span><i style="background:var(--red)"></i>A</span><span><i style="background:var(--yellow)"></i>B</span><span><i style="background:var(--gray)"></i>C</span></div>
         </div>
       </section>
-      <section class="card"><h3>Litros por hora por frente</h3>
-        <div class="cb"><div class="leg"><span><i style="background:var(--green)"></i>Dentro da meta (32,00)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
-      </section>
-      <section class="card"><h3>Litros por tonelada por frente</h3>
-        <div class="cb"><div class="chart" id="c-lt"></div></div>
-      </section>
     </div>
 
     <div class="col">
@@ -123,6 +117,12 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
       </section>
       <section class="card"><h2>Motor ocioso por operador</h2>
         <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Ao lado do nome: frente e colhedora em que mais trabalhou (+N = outras colhedoras; <b>clique no operador com +N para ver todas</b>). Vermelho: acima da meta de 10%.</p></div>
+      </section>
+      <section class="card"><h3>Litros por hora por frente</h3>
+        <div class="cb"><div class="leg"><span><i style="background:var(--green)"></i>Dentro da meta (32,00)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
+      </section>
+      <section class="card"><h3>Litros por tonelada por frente</h3>
+        <div class="cb"><div class="chart" id="c-lt"></div></div>
       </section>
     </div>
 
@@ -311,8 +311,8 @@ meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${
 linha('c-ocdia',D.oc_dia,D.meta_oc,{w:380,h:120,fmt:v=>NF(0)(v*100)+'%',lo:0,hi:1.25,area:true});
 
 /* L/t e litros */
-vbars('c-lh',D.frentes.map(r=>({l:r.l,v:r.lh})),{w:480,h:150,fmt:f2,bw:60,bot:28,scale:.92,color:r=>r.v<=K.meta_lh?'#2e7d32':'#d64550'});
-vbars('c-lt',D.frentes.map(r=>({l:r.l,v:r.lt})),{w:480,h:150,fmt:f2,bw:60,bot:28,scale:.92});
+vbars('c-lh',D.frentes.map(r=>({l:r.l,v:r.lh})),{w:600,h:150,fmt:f2,bw:60,bot:28,scale:.92,color:r=>r.v<=K.meta_lh?'#2e7d32':'#d64550'});
+vbars('c-lt',D.frentes.map(r=>({l:r.l,v:r.lt})),{w:600,h:150,fmt:f2,bw:60,bot:28,scale:.92});
 
 
 /* RPM */

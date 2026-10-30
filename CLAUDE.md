@@ -14,8 +14,8 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
 ## Padrão aprovado pelo usuário (28/10/2026)
 - **Layout** em `gerar/modelo.html`:
   - Colunas (reorganizadas em 30/10/2026):
-    - Esquerda: tabela por colhedora com total por frente; motivo e turno do motor ocioso; L/h e L/t por frente.
-    - Meio: registros de motor ocioso (% ocioso por colhedora com meta de 10%, horas ociosas top 10, paradas longas >10 e >30 min, ocioso diário); motor ocioso por operador.
+    - Esquerda: tabela por colhedora com total por frente; motivo e turno do motor ocioso.
+    - Meio: registros de motor ocioso (% ocioso por colhedora com meta de 10%, horas ociosas top 10, paradas longas >10 e >30 min, ocioso diário); motor ocioso por operador; L/h e L/t por frente (embaixo).
     - Direita: faixa de RPM geral e por frente com top 10 colhedoras em excesso de RPM (>2.000); top 10 operadores em excesso de RPM; quadro sem Solinftec.
   - Rankings de % ocioso, horas ociosas e excesso de RPM por colhedora são clicáveis: abrem os operadores daquela colhedora (motor ligado, ocioso, % ocioso, tempo e % acima de 2.000 RPM).
   - Nos rankings por operador, ao lado do nome: frente e colhedora com mais horas (+N = outras colhedoras). Operador com +N é clicável (azul sublinhado): abre as colhedoras que operou, com frente, horas de motor ligado e % do tempo (30/10/2026).
@@ -34,6 +34,7 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
   - É a sequência de leituras em PARADA com motor ligado (Sim ou RPM ≥ 700).
   - Cada leitura vale até a próxima, com limite de 10 min.
   - Descontam-se 90 s de cada parada.
+- **Operador** vazio ou "null" no monit conta como "Sem Operador" (30/10/2026).
 - **Rankings de operador e de RPM**: só entram com pelo menos 5 h de motor ligado.
 - **Assinatura no rodapé**: "Desenvolvido por João Vitor - CRV".
 

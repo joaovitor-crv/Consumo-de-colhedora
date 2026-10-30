@@ -83,6 +83,12 @@ def ler_pdf(caminho, frentes):
 
 
 # ---------------- monit ----------------
+def sem_null(v):
+    """Operador vazio ou "null" (exportação do monit sem operador logado) vira vazio."""
+    v = (v or "").strip()
+    return "" if v.lower() in ("null", "none", "-") else v
+
+
 def ler_monit(arquivos, frentes, ini, fim):
     d0 = datetime.strptime(ini, "%d/%m/%Y")
     d1 = datetime.strptime(fim, "%d/%m/%Y") + timedelta(days=1)
@@ -102,7 +108,7 @@ def ler_monit(arquivos, frentes, ini, fim):
                     rpm = 0
                 rows[r["Equipamento"].strip()].append(dict(
                     t=t, est=r["Estado"].strip(), lig=r["Motor Ligado"] == "Sim" or rpm >= 700, rpm=rpm,
-                    op=r["Operacao"].strip().title(), oper=(r["Operador"] or "").strip().title() or "Sem Operador",
+                    op=r["Operacao"].strip().title(), oper=sem_null(r["Operador"]).title() or "Sem Operador",
                     g=r["Grupo"].strip()))
     return rows, d1
 
