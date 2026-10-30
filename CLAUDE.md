@@ -17,7 +17,7 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
     - Esquerda: tabela por colhedora com total por frente; motivo e turno do motor ocioso.
     - Meio: registros de motor ocioso (% ocioso por colhedora com meta de 10%, horas ociosas top 10, paradas longas >10 e >30 min, ocioso diário); motor ocioso por operador; L/h e L/t por frente (embaixo).
     - Direita: faixa de RPM geral e por frente com top 10 colhedoras em excesso de RPM (>2.000); top 10 operadores em excesso de RPM; quadro sem Solinftec.
-  - Rankings de % ocioso, horas ociosas e excesso de RPM por colhedora são clicáveis: abrem os operadores daquela colhedora (motor ligado, ocioso, % ocioso, tempo e % acima de 2.000 RPM).
+  - Rankings de % ocioso, horas ociosas e excesso de RPM por colhedora são clicáveis: abrem os operadores daquela colhedora (motor ligado, ocioso, % ocioso, tempo e % acima de 2.000 RPM). Na lista de operadores, o % ocioso é clicável: abre os apontamentos (motivos) do motor ocioso daquele operador naquela colhedora, com horas, % do ocioso e % do motor ligado, e botão para voltar (30/10/2026).
   - Nos rankings por operador, ao lado do nome: frente e colhedora com mais horas (+N = outras colhedoras). Operador com +N é clicável (azul sublinhado): abre as colhedoras que operou, com frente, horas de motor ligado e % do tempo (30/10/2026).
   - Motor ocioso por motivo: 7 maiores motivos + "Outros". "Outros" é clicável e abre cada motivo com horas, % de Outros e % do total ocioso (30/10/2026).
   - Quadro "Com abastecimento, sem dados no Solinftec" (frotas do PDF sem monit), no fim da coluna direita.

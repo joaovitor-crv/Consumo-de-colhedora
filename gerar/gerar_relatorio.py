@@ -121,13 +121,19 @@ def turno(t):
     return "A" if 7 <= t.hour < 15 else "B" if 15 <= t.hour < 23 else "C"
 
 
-def detalhe(ep_l, ep_o, ep_x):
+def nome_motivo(m):
+    return m.replace("Manutencao", "Manutenção").replace("Refeicao", "Refeição")
+
+
+def detalhe(ep_l, ep_o, ep_x, ep_m):
     """Por colhedora: operadores com motor ligado, ocioso e tempo acima de 2.000 RPM (para o clique nos rankings)."""
     det = collections.defaultdict(list)
     for (eq, op), lig in ep_l.items():
         if lig < 900:  # menos de 15 min de motor ligado na colhedora: não entra
             continue
-        det[eq].append(dict(op=op, lig=lig / 3600, oc=ep_o[(eq, op)] / 3600, x=ep_x[(eq, op)] / 3600))
+        mot = sorted(ep_m[(eq, op)].items(), key=lambda m: -m[1])
+        det[eq].append(dict(op=op, lig=lig / 3600, oc=ep_o[(eq, op)] / 3600, x=ep_x[(eq, op)] / 3600,
+                            mot=[[nome_motivo(m), round(v / 3600, 4)] for m, v in mot if v > 0]))
     return {eq: sorted(L, key=lambda r: -r["lig"]) for eq, L in det.items()}
 
 
@@ -140,6 +146,7 @@ def calcular(rows, fim_dt):
     eq_rpm = collections.defaultdict(lambda: collections.defaultdict(float))
     op_rpm = collections.defaultdict(lambda: collections.defaultdict(float))
     ep_l = collections.defaultdict(float); ep_o = collections.defaultdict(float); ep_x = collections.defaultdict(float)
+    ep_m = collections.defaultdict(lambda: collections.defaultdict(float))  # ocioso por colhedora, operador e motivo
     longas = {}
     tot = dict(paradas=0, paradas_90=0, oc_bruto=0.0)
     for eq, L in rows.items():
@@ -169,7 +176,7 @@ def calcular(rows, fim_dt):
                     tot["paradas_90"] += 1; k = (dur - DESCONTO) / dur
                     for s in L[i:j]:
                         v = s["d"] * k; oc += v
-                        oc_d[s["t"].strftime("%d/%m")] += v; mot[s["op"]] += v; tur[turno(s["t"])] += v; op_o[s["oper"]] += v; ep_o[(eq, s["oper"])] += v
+                        oc_d[s["t"].strftime("%d/%m")] += v; mot[s["op"]] += v; tur[turno(s["t"])] += v; op_o[s["oper"]] += v; ep_o[(eq, s["oper"])] += v; ep_m[(eq, s["oper"])][s["op"]] += v
                 i = j
             else:
                 i += 1
@@ -206,9 +213,9 @@ def calcular(rows, fim_dt):
                     for g in sorted(fr_rpm, key=lambda s: int(s.split()[-1]))],
         rpm_top=rtop[:10],
         rpm_op=otop[:10],
-        det=detalhe(ep_l, ep_o, ep_x),
+        det=detalhe(ep_l, ep_o, ep_x, ep_m),
         motivo=[dict(l=l, v=v / 3600) for l, v in mt[:7]] + ([dict(l="Outros", v=outros / 3600)] if outros else []),
-        outros=[dict(l=l.replace("Manutencao", "Manutenção").replace("Refeicao", "Refeição"), v=v / 3600) for l, v in mt[7:] if v > 0],
+        outros=[dict(l=nome_motivo(l), v=v / 3600) for l, v in mt[7:] if v > 0],
         oc_turno=[dict(l=t, v=tur[t] / 3600) for t in "ABC"],
         oc_op=ops[:10],
         longas=lg[:8],

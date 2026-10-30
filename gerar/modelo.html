@@ -70,6 +70,8 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .dt td{text-align:right;padding:5px 8px;border-bottom:1px solid #eef0f4;white-space:nowrap}
 .dt th:first-child,.dt td:first-child{text-align:left}
 .dt td.kr{color:var(--red);font-weight:700}.dt td.kgn{color:var(--green);font-weight:700}
+.lk{color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}.lk:hover{color:var(--navy-2)}
+#dlg-v{margin:4px 0 6px;background:#fff;border:1px solid var(--navy);color:var(--navy);border-radius:6px;font:600 12px var(--font);padding:4px 10px;cursor:pointer}
 .mb{display:block;height:5px;background:#eef0f4;border-radius:3px;margin-top:2px;min-width:70px}.mb i{display:block;height:5px;border-radius:3px}
 .tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:4px 8px;font-size:12px;white-space:nowrap;z-index:5}
 @media (max-width:1250px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid .col:last-child{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
@@ -165,7 +167,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 <div class="dlg" id="dlg" hidden role="dialog" aria-modal="true" aria-labelledby="dlg-t">
   <div class="dlg-c">
     <div class="dlg-h"><div><b id="dlg-t"></b><small id="dlg-s"></small></div><button id="dlg-x" type="button" aria-label="Fechar">✕</button></div>
-    <div style="padding:6px 10px 12px"><div style="overflow-x:auto"><table class="dt"><thead id="dlg-h"><tr><th>Operador</th><th>Motor ligado (h)</th><th>Ocioso (h)</th><th>% ocioso</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th></tr></thead><tbody id="dlg-b"></tbody></table></div>
+    <div style="padding:6px 10px 12px"><button id="dlg-v" type="button" hidden>← Voltar aos operadores</button><div style="overflow-x:auto"><table class="dt"><thead id="dlg-h"><tr><th>Operador</th><th>Motor ligado (h)</th><th>Ocioso (h)</th><th>% ocioso</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th></tr></thead><tbody id="dlg-b"></tbody></table></div>
     <p class="note" id="dlg-n" style="padding:0 2px">Operador registrado no monit nessa colhedora (pelo menos 15 min de motor ligado). Meta de ocioso: 10%.</p></div>
   </div>
 </div>
@@ -272,19 +274,20 @@ const maqTip=r=>(r.maq||[]).map(m=>`${m.eq} (${m.fr}, ${f1(m.h)} h)`).join(', ')
 function clicavel(s,box,x,y,w,h,r,fn,txt,dica){const a=el('rect',{x,y,width:w,height:h,fill:'transparent',style:'cursor:pointer'},s);
  a.addEventListener('click',()=>fn(r.l));const T=tip(box);a.addEventListener('mousemove',e=>T(e,`${txt} · ${dica||'clique para ver os operadores'}`));a.addEventListener('mouseleave',()=>T());}
 const HOP=document.getElementById('dlg-h').innerHTML,NOP=document.getElementById('dlg-n').innerHTML;
-function detalhe(eq,modo){const L=(D.det||{})[eq]||[];const dlg=document.getElementById('dlg');document.getElementById('dlg-h').innerHTML=HOP;document.getElementById('dlg-n').innerHTML=NOP;
+function detalhe(eq,modo){const L=(D.det||{})[eq]||[];const dlg=document.getElementById('dlg');document.getElementById('dlg-h').innerHTML=HOP;document.getElementById('dlg-n').innerHTML=NOP;document.getElementById('dlg-v').hidden=true;
  const rows=L.map(r=>({...r,poc:r.lig?r.oc/r.lig:0,px:r.lig?r.x/r.lig:0}));rows.sort((a,b)=>modo==='rpm'?b.px-a.px:b.poc-a.poc);
  const nm=s=>{const w=s.split(' ');return w.length>1?w[0]+' '+w[w.length-1]:w[0]};
  const barra=(v,max,cor)=>`<span class="mb"><i style="width:${Math.max(2,v/max*100)}%;background:${cor}"></i></span>`;
  const mOc=Math.max(...rows.map(r=>r.poc),D.meta_oc),mX=Math.max(...rows.map(r=>r.px),.01);
  document.getElementById('dlg-t').textContent=`Colhedora ${eq} — operadores`;
- document.getElementById('dlg-s').textContent=modo==='rpm'?'Ordenado por % do tempo acima de 2.000 RPM':'Ordenado por % de motor ocioso';
- document.getElementById('dlg-b').innerHTML=rows.length?rows.map(r=>`<tr><td title="${r.op}">${nm(r.op)}</td><td>${f1(r.lig)}</td>
-   <td>${f1(r.oc)}</td><td class="${r.poc>D.meta_oc?'kr':'kgn'}">${pc(r.poc,1)}${barra(r.poc,mOc,r.poc>D.meta_oc?'#d64550':'#2e7d32')}</td>
+ document.getElementById('dlg-s').textContent=(modo==='rpm'?'Ordenado por % do tempo acima de 2.000 RPM':'Ordenado por % de motor ocioso')+' · clique no % ocioso para ver os apontamentos';
+ ULT={eq,modo,rows};
+ document.getElementById('dlg-b').innerHTML=rows.length?rows.map((r,i)=>`<tr><td title="${r.op}">${nm(r.op)}</td><td>${f1(r.lig)}</td>
+   <td>${f1(r.oc)}</td><td class="${r.poc>D.meta_oc?'kr':'kgn'}">${(r.mot||[]).length?`<a class="lk" href="#" data-i="${i}" title="Ver os apontamentos do motor ocioso">${pc(r.poc,1)}</a>`:pc(r.poc,1)}${barra(r.poc,mOc,r.poc>D.meta_oc?'#d64550':'#2e7d32')}</td>
    <td>${f1(r.x)}</td><td class="${r.px>0?'kr':''}">${pc(r.px,1)}${barra(r.px,mX,'#d64550')}</td></tr>`).join(''):'<tr><td colspan="6">Sem operadores registrados no monit.</td></tr>';
  dlg.hidden=false;document.getElementById('dlg-x').focus();}
 function maquinas(r){const m=[...(r.maq||[])].sort((a,b)=>b.h-a.h);const tot=m.reduce((a,x)=>a+x.h,0)||1;const mx=Math.max(...m.map(x=>x.h),.01);
- document.getElementById('dlg-t').textContent=`${nomeCurto(r.l)} — colhedoras operadas`;
+ document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent=`${nomeCurto(r.l)} — colhedoras operadas`;
  document.getElementById('dlg-s').textContent=r.l;
  document.getElementById('dlg-h').innerHTML='<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th></tr>';
  document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${f1(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td></tr>`).join('')
@@ -292,13 +295,24 @@ function maquinas(r){const m=[...(r.maq||[])].sort((a,b)=>b.h-a.h);const tot=m.r
  document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit. A primeira é a que aparece ao lado do nome; as demais formam o +N.';
  document.getElementById('dlg').hidden=false;document.getElementById('dlg-x').focus();}
 function outros(){const L=[...(D.outros||[])].sort((a,b)=>b.v-a.v);const tot=L.reduce((a,x)=>a+x.v,0)||1;const all=D.motivo.reduce((a,x)=>a+x.v,0)||1;const mx=Math.max(...L.map(x=>x.v),.01);
- document.getElementById('dlg-t').textContent='Motor ocioso — motivos dentro de "Outros"';
+ document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent='Motor ocioso — motivos dentro de "Outros"';
  document.getElementById('dlg-s').textContent=`${f1(tot)} h ociosas em ${L.length} motivos`;
  document.getElementById('dlg-h').innerHTML='<tr><th>Motivo</th><th>Horas ociosas</th><th>% de Outros</th><th>% do total ocioso</th></tr>';
  document.getElementById('dlg-b').innerHTML=L.map(x=>`<tr><td>${x.l}</td><td>${f2(x.v)}</td><td>${pc(x.v/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.v/mx*100)}%;background:#22378c"></i></span></td><td>${pc(x.v/all,1)}</td></tr>`).join('')
   +`<tr><td><b>Total Outros</b></td><td><b>${f2(tot)}</b></td><td><b>100,0%</b></td><td><b>${pc(tot/all,1)}</b></td></tr>`;
  document.getElementById('dlg-n').textContent='Horas de motor ocioso (parada com motor ligado, já descontados os 90 s de cada parada) por motivo apontado no monit. "Outros" junta os motivos fora dos 7 maiores.';
  document.getElementById('dlg').hidden=false;document.getElementById('dlg-x').focus();}
+let ULT=null;
+function apont(r){const L=r.mot||[];const tot=L.reduce((a,x)=>a+x[1],0)||1;const mx=Math.max(...L.map(x=>x[1]),.0001);
+ document.getElementById('dlg-t').textContent=`${nomeCurto(r.op)} — apontamentos do motor ocioso`;
+ document.getElementById('dlg-s').textContent=`Colhedora ${ULT.eq} · ${f1(r.oc)} h ociosas de ${f1(r.lig)} h de motor ligado (${pc(r.poc,1)})`;
+ document.getElementById('dlg-h').innerHTML='<tr><th>Apontamento</th><th>Horas ociosas</th><th>% do ocioso</th><th>% do motor ligado</th></tr>';
+ document.getElementById('dlg-b').innerHTML=L.map(([m,v])=>`<tr><td>${m}</td><td>${f2(v)}</td><td>${pc(v/tot,1)}<span class="mb"><i style="width:${Math.max(2,v/mx*100)}%;background:${m==='Sem Apontamento'||m==='Aguardando Transbordo'?'#d64550':'#22378c'}"></i></span></td><td>${pc(r.lig?v/r.lig:0,1)}</td></tr>`).join('')
+  +`<tr><td><b>Total</b></td><td><b>${f2(tot)}</b></td><td><b>100,0%</b></td><td><b>${pc(r.poc,1)}</b></td></tr>`;
+ document.getElementById('dlg-n').textContent='Motor ocioso (parada com motor ligado, já descontados os 90 s de cada parada) desse operador nessa colhedora, pelo apontamento registrado no monit. A soma de "% do motor ligado" é o % ocioso do operador.';
+ document.getElementById('dlg-v').hidden=false;document.getElementById('dlg-v').focus();}
+document.getElementById('dlg-b').addEventListener('click',e=>{const a=e.target.closest('.lk');if(!a||!ULT)return;e.preventDefault();apont(ULT.rows[+a.dataset.i])});
+document.getElementById('dlg-v').addEventListener('click',()=>{if(ULT)detalhe(ULT.eq,ULT.modo)});
 function fecha(){document.getElementById('dlg').hidden=true}
 document.getElementById('dlg').addEventListener('click',e=>{if(e.target.id==='dlg')fecha()});
 document.getElementById('dlg-x').addEventListener('click',fecha);
