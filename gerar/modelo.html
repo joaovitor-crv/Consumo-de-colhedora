@@ -98,6 +98,12 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
           <div class="leg"><b>Turno:</b><span><i style="background:var(--red)"></i>A</span><span><i style="background:var(--yellow)"></i>B</span><span><i style="background:var(--gray)"></i>C</span></div>
         </div>
       </section>
+      <section class="card"><h3>Litros por hora por frente</h3>
+        <div class="cb"><div class="leg"><span><i style="background:var(--green)"></i>Dentro da meta (32,00)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
+      </section>
+      <section class="card"><h3>Litros por tonelada por frente</h3>
+        <div class="cb"><div class="chart" id="c-lt"></div></div>
+      </section>
     </div>
 
     <div class="col">
@@ -115,15 +121,8 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
           </div>
         </div>
       </section>
-      <section class="card"><h3>Litros por hora por frente</h3>
-        <div class="cb"><div class="leg"><span><i style="background:var(--green)"></i>Dentro da meta (32,00)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
-      </section>
-      <section class="card"><h3>Litros por tonelada por frente</h3>
-        <div class="cb"><div class="chart" id="c-lt"></div></div>
-      </section>
-      <section class="card"><h3>Top 10 operadores em excesso de RPM (acima de 2.000)</h3>
-        <div class="cb"><div class="chart" id="c-rpmop"></div>
-          <p class="note">% do tempo de motor ligado acima de 2.000 RPM, pelo operador registrado no monit. Entram operadores com pelo menos 5 h de motor ligado na semana. <b>Clique no operador com +N para ver as outras colhedoras.</b></p></div>
+      <section class="card"><h2>Motor ocioso por operador</h2>
+        <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Ao lado do nome: frente e colhedora em que mais trabalhou (+N = outras colhedoras; <b>clique no operador com +N para ver todas</b>). Vermelho: acima da meta de 10%.</p></div>
       </section>
     </div>
 
@@ -138,8 +137,9 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
           <p class="note">% do tempo de motor ligado acima de 2.000 RPM. Entram colhedoras com pelo menos 5 h de motor ligado na semana. <b>Clique numa colhedora para ver os operadores.</b></p>
         </div>
       </section>
-      <section class="card"><h2>Motor ocioso por operador</h2>
-        <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Ao lado do nome: frente e colhedora em que mais trabalhou (+N = outras colhedoras; <b>clique no operador com +N para ver todas</b>). Vermelho: acima da meta de 10%.</p></div>
+      <section class="card"><h3>Top 10 operadores em excesso de RPM (acima de 2.000)</h3>
+        <div class="cb"><div class="chart" id="c-rpmop"></div>
+          <p class="note">% do tempo de motor ligado acima de 2.000 RPM, pelo operador registrado no monit. Entram operadores com pelo menos 5 h de motor ligado na semana. <b>Clique no operador com +N para ver as outras colhedoras.</b></p></div>
       </section>
       <section class="card" id="card-sem" hidden><h3>Com abastecimento, sem dados no Solinftec <span id="sem-n"></span></h3>
         <div class="cb"><div class="to-wrap"><table class="to"><thead><tr><th>Frota</th><th>Frente</th><th>Litros</th><th>Horas</th><th>L/h</th></tr></thead><tbody id="t-sem"></tbody></table></div>
@@ -307,12 +307,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')fecha()});
 meta_bars('c-ocfx',D.oc_frota,{w:600,lw:52,vw:52,rh:20,click:eq=>detalhe(eq,'oc')});
 hbars('c-octop',D.oc_top,{w:230,vw:46,fmt:f1,lw:52,click:eq=>detalhe(eq,'oc')});
 const to=document.getElementById('t-oc');D.longas.forEach(r=>{const tr=to.insertRow();[r.frota,f0(r.p10),f0(r.p30),f1(r.h10)].forEach(t=>{tr.insertCell().textContent=t})});
-meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${f1(r.oc)} h ociosas de ${f1(r.lig)} h ligado · máquinas: ${maqTip(r)}`,onclick:(r.maq||[]).length>1?()=>maquinas(r):null})),{w:460,lw:230,vw:48,rh:24,fs:11});
+meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${f1(r.oc)} h ociosas de ${f1(r.lig)} h ligado · máquinas: ${maqTip(r)}`,onclick:(r.maq||[]).length>1?()=>maquinas(r):null})),{w:600,lw:240,vw:52,rh:24,fs:12});
 linha('c-ocdia',D.oc_dia,D.meta_oc,{w:380,h:120,fmt:v=>NF(0)(v*100)+'%',lo:0,hi:1.25,area:true});
 
 /* L/t e litros */
-vbars('c-lh',D.frentes.map(r=>({l:r.l,v:r.lh})),{w:600,h:150,fmt:f2,bw:60,bot:28,scale:.92,color:r=>r.v<=K.meta_lh?'#2e7d32':'#d64550'});
-vbars('c-lt',D.frentes.map(r=>({l:r.l,v:r.lt})),{w:600,h:150,fmt:f2,bw:60,bot:28,scale:.92});
+vbars('c-lh',D.frentes.map(r=>({l:r.l,v:r.lh})),{w:480,h:150,fmt:f2,bw:60,bot:28,scale:.92,color:r=>r.v<=K.meta_lh?'#2e7d32':'#d64550'});
+vbars('c-lt',D.frentes.map(r=>({l:r.l,v:r.lt})),{w:480,h:150,fmt:f2,bw:60,bot:28,scale:.92});
 
 
 /* RPM */
@@ -327,7 +327,7 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:(r,i)
    if(w>30)el('text',{x:x+w/2,y:y+(rh-10)/2+4,'text-anchor':'middle','font-size':11,'font-weight':700,style:'fill:'+(k===3||k===4?'#1d2433':'#fff')},s,NF(0)(v*100)+'%');x+=w}});
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
- hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:(r.maq||[]).length>1?()=>maquinas(r):null})),{w:600,vw:62,lw:250,rh:24,fmt:v=>pc(v,1),bold:true,fs:12,color:()=>'#d64550'});
+ hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:(r.maq||[]).length>1?()=>maquinas(r):null})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
  hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550',click:eq=>detalhe(eq,'rpm')});
 })();
 /* frotas sem Solinftec */

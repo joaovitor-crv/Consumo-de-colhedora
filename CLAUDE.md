@@ -13,14 +13,14 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
 
 ## Padrão aprovado pelo usuário (28/10/2026)
 - **Layout** em `gerar/modelo.html`:
-  - Tabela por colhedora com total por frente, e abaixo dela motivo e turno do motor ocioso.
-  - % ocioso por colhedora com meta de 10%, horas ociosas (top 10), paradas longas (>10 e >30 min) e ocioso diário.
-  - L/h e L/t por frente.
-  - Faixa de RPM geral e por frente, top 10 colhedoras e top 10 operadores em excesso de RPM (>2.000) e ocioso por operador.
+  - Colunas (reorganizadas em 30/10/2026):
+    - Esquerda: tabela por colhedora com total por frente; motivo e turno do motor ocioso; L/h e L/t por frente.
+    - Meio: registros de motor ocioso (% ocioso por colhedora com meta de 10%, horas ociosas top 10, paradas longas >10 e >30 min, ocioso diário); motor ocioso por operador.
+    - Direita: faixa de RPM geral e por frente com top 10 colhedoras em excesso de RPM (>2.000); top 10 operadores em excesso de RPM; quadro sem Solinftec.
   - Rankings de % ocioso, horas ociosas e excesso de RPM por colhedora são clicáveis: abrem os operadores daquela colhedora (motor ligado, ocioso, % ocioso, tempo e % acima de 2.000 RPM).
   - Nos rankings por operador, ao lado do nome: frente e colhedora com mais horas (+N = outras colhedoras). Operador com +N é clicável (azul sublinhado): abre as colhedoras que operou, com frente, horas de motor ligado e % do tempo (30/10/2026).
   - Motor ocioso por motivo: 7 maiores motivos + "Outros". "Outros" é clicável e abre cada motivo com horas, % de Outros e % do total ocioso (30/10/2026).
-  - Abaixo do ocioso por operador: quadro "Com abastecimento, sem dados no Solinftec" (frotas do PDF sem monit).
+  - Quadro "Com abastecimento, sem dados no Solinftec" (frotas do PDF sem monit), no fim da coluna direita.
 - **Cores de RPM**:
   - Verde: marcha lenta (até 900).
   - Azul claro: 901–1.500.
