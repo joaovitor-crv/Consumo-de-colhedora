@@ -73,6 +73,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .lk{color:inherit;text-decoration:underline;text-underline-offset:2px;cursor:pointer}.lk:hover{color:var(--navy-2)}
 #dlg-v{margin:4px 0 6px;background:#fff;border:1px solid var(--navy);color:var(--navy);border-radius:6px;font:600 12px var(--font);padding:4px 10px;cursor:pointer}
 .mb{display:block;height:5px;background:#eef0f4;border-radius:3px;margin-top:2px;min-width:70px}.mb i{display:block;height:5px;border-radius:3px}
+.frops{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}.frops td{padding:4px 2px;border-bottom:1px solid #eef0f4;vertical-align:top}.frops td:first-child{white-space:nowrap;padding-right:8px}.frops a{color:#2a44a8;font-weight:600}.frops b{color:#d64550}.frops .op{white-space:nowrap}
 .tip{position:absolute;pointer-events:none;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.12);padding:4px 8px;font-size:12px;white-space:nowrap;z-index:5}
 @media (max-width:1250px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid .col:last-child{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
 @media (max-width:820px){.top{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid,.grid .col:last-child{grid-template-columns:minmax(0,1fr);display:grid}.split{grid-template-columns:minmax(0,1fr)}}
@@ -133,7 +134,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         <div class="cb"><div class="chart" id="c-rpm"></div>
           <h3 class="sub">Faixa de RPM por frente</h3>
           <div class="chart" id="c-rpmfr"></div>
-          <div class="leg" id="leg-rpm"></div><p class="note" style="text-align:center">Clique numa frente para ver os operadores que mais passaram de 2.000 RPM.</p>
+          <div class="leg" id="leg-rpm"></div><h3 class="sub">Operadores acima de 2.000 RPM por frente</h3><div id="fr-ops"></div><p class="note" style="text-align:center">Os 3 operadores de cada frente com mais tempo acima de 2.000 RPM (% do tempo de motor ligado). Clique na frente para ver todos.</p>
           <h3 class="sub">Top 10 colhedoras em excesso de RPM (acima de 2.000)</h3>
           <div class="chart" id="c-rpmtop"></div>
           <p class="note">% do tempo de motor ligado acima de 2.000 RPM. Entram colhedoras com pelo menos 5 h de motor ligado na semana. <b>Clique numa colhedora para ver os operadores.</b></p>
@@ -351,7 +352,12 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:(r,i)
  D.rpm_frente.forEach((r,i)=>{const y=i*rh+4;let x=lw;const temOp=(FO[r.l]||[]).length>0;el('text',{x:lw-8,y:y+rh/2+2,'text-anchor':'end','font-size':12,...(temOp?{style:'fill:#2a44a8;text-decoration:underline'}:{})},s,r.l);
   for(let k=0;k<6;k++){const v=r['b'+k],w=bw*v;const rc=el('rect',{x,y,width:w,height:rh-10,fill:cores[k]},s);hover(rc,box,`${r.l} · ${nomes[k]}: ${pc(v,1)}`);
    if(w>30)el('text',{x:x+w/2,y:y+(rh-10)/2+4,'text-anchor':'middle','font-size':11,'font-weight':700,style:'fill:'+(k===3||k===4?'#1d2433':'#fff')},s,NF(0)(v*100)+'%');x+=w}
-  if(temOp){const a=el('rect',{x:0,y:y-2,width:lw-2,height:rh-6,fill:'transparent',style:'cursor:pointer'},s);a.addEventListener('click',()=>frenteRpm(r));const T=tip(box);a.addEventListener('mousemove',e=>T(e,`${r.l} · clique para ver os operadores`));a.addEventListener('mouseleave',()=>T());}});
+  if(temOp){const a=el('rect',{x:0,y:y-2,width:W,height:rh-6,fill:'transparent',style:'cursor:pointer'},s);a.addEventListener('click',()=>frenteRpm(r));const T=tip(box);a.addEventListener('mousemove',e=>T(e,`${r.l} · clique para ver os operadores`));a.addEventListener('mouseleave',()=>T());}});
+ (()=>{const FO2=D.rpm_frente_op||{};const box2=document.getElementById('fr-ops');const n=RPMN.length;
+  if(!Object.keys(FO2).length){box2.closest('.cb').querySelectorAll('#fr-ops, #fr-ops + .note').forEach(e=>e.hidden=true);box2.previousElementSibling.hidden=true;return}
+  box2.innerHTML='<table class="frops">'+D.rpm_frente.map((r,i)=>{const top=(FO2[r.l]||[]).map(o=>({o,p:o.lig?o.b[n-1]/o.lig:0})).filter(z=>z.p>0&&z.o.op!=='Sem Operador').slice(0,3);
+   return `<tr><td><a href="#" class="lk" data-fr="${i}">${r.l}</a></td><td>${top.length?top.map(z=>`<span class="op" title="${z.o.op} · ${z.o.maq.join(', ')} · ${fh(z.o.b[n-1])} h acima de 2.000">${nomeCurto(z.o.op)} <b>${NF(0)(z.p*100)}%</b></span>`).join(' · '):'Ninguém acima de 2.000 RPM'}</td></tr>`}).join('')+'</table>';
+  box2.addEventListener('click',e=>{const a=e.target.closest('[data-fr]');if(!a)return;e.preventDefault();frenteRpm(D.rpm_frente[+a.dataset.fr])});})();
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
  hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:(r.maq||[]).length>1?()=>maquinas(r):null})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
