@@ -18,14 +18,17 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
   - L/h e L/t por frente.
   - Faixa de RPM geral e por frente, top 10 colhedoras e top 10 operadores em excesso de RPM (>2.000) e ocioso por operador.
   - Rankings de % ocioso, horas ociosas e excesso de RPM por colhedora são clicáveis: abrem os operadores daquela colhedora (motor ligado, ocioso, % ocioso, tempo e % acima de 2.000 RPM).
-  - Nos rankings por operador, ao lado do nome: frente e colhedora com mais horas (+N = outras colhedoras; hover lista todas).
+  - Nos rankings por operador, ao lado do nome: frente e colhedora com mais horas (+N = outras colhedoras). Operador com +N é clicável (azul sublinhado): abre as colhedoras que operou, com frente, horas de motor ligado e % do tempo (30/10/2026).
+  - Motor ocioso por motivo: 7 maiores motivos + "Outros". "Outros" é clicável e abre cada motivo com horas, % de Outros e % do total ocioso (30/10/2026).
   - Abaixo do ocioso por operador: quadro "Com abastecimento, sem dados no Solinftec" (frotas do PDF sem monit).
 - **Cores de RPM**:
   - Verde: marcha lenta (até 900).
   - Azul claro: 901–1.500.
   - Azul escuro: 1.501–1.800.
-  - Amarelo pastel: 1.801–2.000.
-  - Vermelho: acima de 2.000 (excesso).
+  - Amarelo pastel: 1.801–1.900.
+  - Laranja: 1.901–2.000.
+  - Vermelho: 2.001+ (excesso).
+- **Faixas de RPM** (30/10/2026): 1–900, 901–1.500, 1.501–1.800, 1.801–1.900, 1.901–2.000 e 2.001+, no gráfico geral e por frente.
 - **Metas**: 32,00 L/h e 10% de motor ocioso.
 - **Motor ocioso**:
   - É a sequência de leituras em PARADA com motor ligado (Sim ou RPM ≥ 700).

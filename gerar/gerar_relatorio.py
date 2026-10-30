@@ -25,7 +25,8 @@ DESCONTO = 90      # segundos descontados de cada parada com motor ligado
 META_LH, META_LT, META_OC = 32.0, 1.0, 0.10
 MIN_H = 5 * 3600   # mínimo de motor ligado para entrar nos rankings (operador e RPM)
 ROMANO = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "IX": 9, "X": 10}
-BANDAS = ["1 - 900 (lenta)", "901 - 1.500", "1.501 - 1.800", "1.801 - 2.000", "Acima de 2.000"]
+BANDAS = ["1 - 900 (lenta)", "901 - 1.500", "1.501 - 1.800", "1.801 - 1.900", "1.901 - 2.000", "2.001+"]
+EXC = BANDAS[-1]  # excesso de RPM: acima de 2.000
 
 
 def num(s):
@@ -107,7 +108,7 @@ def ler_monit(arquivos, frentes, ini, fim):
 
 
 def banda(r):
-    return BANDAS[0] if r <= 900 else BANDAS[1] if r <= 1500 else BANDAS[2] if r <= 1800 else BANDAS[3] if r <= 2000 else BANDAS[4]
+    return BANDAS[0] if r <= 900 else BANDAS[1] if r <= 1500 else BANDAS[2] if r <= 1800 else BANDAS[3] if r <= 1900 else BANDAS[4] if r <= 2000 else BANDAS[5]
 
 
 def turno(t):
@@ -182,9 +183,9 @@ def calcular(rows, fim_dt):
                 fr=", ".join(sorted(op_f[o])) if len(op_f[o]) <= 3 else f"{len(op_f[o])} colhedoras")
            for o in op_l if op_l[o] >= MIN_H]
     ops.sort(key=lambda x: -x["v"])
-    rtop = [dict(l=e, v=v[BANDAS[4]] / sum(v.values())) for e, v in eq_rpm.items() if sum(v.values()) >= MIN_H]
+    rtop = [dict(l=e, v=v[EXC] / sum(v.values())) for e, v in eq_rpm.items() if sum(v.values()) >= MIN_H]
     rtop.sort(key=lambda x: -x["v"])
-    otop = [dict(l=o, v=v[BANDAS[4]] / sum(v.values()), h=v[BANDAS[4]] / 3600, lig=sum(v.values()) / 3600, maq=maquinas(o),
+    otop = [dict(l=o, v=v[EXC] / sum(v.values()), h=v[EXC] / 3600, lig=sum(v.values()) / 3600, maq=maquinas(o),
                  fr=", ".join(sorted(op_f[o])) if len(op_f[o]) <= 3 else f"{len(op_f[o])} colhedoras")
             for o, v in op_rpm.items() if sum(v.values()) >= MIN_H]
     otop.sort(key=lambda x: -x["v"])
@@ -201,6 +202,7 @@ def calcular(rows, fim_dt):
         rpm_op=otop[:10],
         det=detalhe(ep_l, ep_o, ep_x),
         motivo=[dict(l=l, v=v / 3600) for l, v in mt[:7]] + ([dict(l="Outros", v=outros / 3600)] if outros else []),
+        outros=[dict(l=l.replace("Manutencao", "Manutenção").replace("Refeicao", "Refeição"), v=v / 3600) for l, v in mt[7:] if v > 0],
         oc_turno=[dict(l=t, v=tur[t] / 3600) for t in "ABC"],
         oc_op=ops[:10],
         longas=lg[:8],
@@ -246,7 +248,7 @@ def main():
                horas=TH, lh=TL / TH if TH else 0, meta_lh=META_LH, horas_oc=t["oc"], horas_oc_bruto=t["oc_bruto"],
                paradas=t["paradas"], paradas_90=t["paradas_90"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0),
         tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit,
-        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "oc_turno", "oc_op", "longas"]},
+        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "outros", "oc_turno", "oc_op", "longas"]},
         notas=[
             f"Litros, horas, toneladas, L/h e L/t: coluna SEMANA ({ini[:5]} a {fim}) do Indicador de Consumo de Combustível — Colhedoras"
             + (f", atualizado em {atualizado}" if atualizado else "") + f". Frentes {nf}.",
