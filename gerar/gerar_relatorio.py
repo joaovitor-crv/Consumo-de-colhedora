@@ -83,6 +83,12 @@ def ler_pdf(caminho, frentes):
 
 
 # ---------------- monit ----------------
+def hm(h):
+    """Horas decimais em horas:minutos (0,5 -> 0:30)."""
+    m = round(h * 60)
+    return f"{br(m // 60, 0)}:{m % 60:02d}"
+
+
 def sem_null(v):
     """Operador vazio ou "null" (exportação do monit sem operador logado) vira vazio."""
     v = (v or "").strip()
@@ -269,8 +275,8 @@ def main():
             + (f" Sem telemetria nesse período: {', '.join(sem)} ({'aparece' if len(sem) == 1 else 'aparecem'} na tabela só com os dados de consumo)." if sem else ""),
             *([totais["_aviso"]] if totais.get("_aviso") else []),
             f"Motor ocioso descontando 90 s de cada parada: {br(t['paradas'], 0)} paradas com motor ligado; "
-            f"{br(t['paradas'] - t['paradas_90'], 0)} duraram até 90 s e não contam. Sem o desconto seriam {br(t['oc_bruto'], 1)} h; "
-            f"com o desconto, {br(t['oc'], 1)} h.",
+            f"{br(t['paradas'] - t['paradas_90'], 0)} duraram até 90 s e não contam. Sem o desconto seriam {hm(t['oc_bruto'])} h; "
+            f"com o desconto, {hm(t['oc'])} h.",
         ])
     html = open(os.path.join(AQUI, "modelo.html"), encoding="utf-8").read()
     html = html.replace("__DADOS__", json.dumps(D, ensure_ascii=False)).replace("__FRENTES__", f"Frentes {nf}")
