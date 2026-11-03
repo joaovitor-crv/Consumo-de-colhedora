@@ -310,15 +310,15 @@ function detalhe(eq,modo){const L=(D.det||{})[eq]||[];const dlg=document.getElem
    <td>${fh(r.x)}</td><td class="${r.px>0?'kr':''}">${pc(r.px,1)}${barra(r.px,mX,'#d64550')}</td></tr>`).join(''):'<tr><td colspan="6">Sem operadores registrados no monit.</td></tr>';
  dlg.hidden=false;document.getElementById('dlg-x').focus();}
 function maquinas(nome,volta){const m=[...((D.op_maq||{})[nome]||[])].sort((a,b)=>b.h-a.h);const tot=m.reduce((a,x)=>a+x.h,0)||1;const mx=Math.max(...m.map(x=>x.h),.01);
- const to=m.reduce((a,x)=>a+(x.o||0),0),tx=m.reduce((a,x)=>a+(x.x||0),0);const co=v=>v>D.meta_oc?'#d64550':'#2e7d32';
+ const v1=m.length>1,to=m.reduce((a,x)=>a+(x.o||0),0),tx=m.reduce((a,x)=>a+(x.x||0),0);const co=v=>v>D.meta_oc?'#d64550':'#2e7d32';
  const bv=document.getElementById('dlg-v');VOLTA=volta||null;bv.hidden=!volta;if(volta)bv.textContent=volta.txt||'← Voltar';
  document.getElementById('dlg-t').textContent=`${nomeCurto(nome)} — colhedoras operadas`;
  document.getElementById('dlg-s').textContent=`${nome} · ${fh(tot)} h de motor ligado · ocioso ${pc(to/tot,1)} · acima de 2.000 RPM ${pc(tx/tot,1)}`;
- document.getElementById('dlg-h').innerHTML='<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th><th>Ocioso (h)</th><th>% ocioso</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th></tr>';
- document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0&&m.length>1?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td><td>${fh(x.o||0)}</td><td style="color:${co((x.o||0)/(x.h||1))};font-weight:700">${pc((x.o||0)/(x.h||1),1)}</td><td>${fh(x.x||0)}</td><td style="color:#d64550;font-weight:700">${pc((x.x||0)/(x.h||1),1)}</td></tr>`).join('')
+ document.getElementById('dlg-h').innerHTML=`<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th>${v1?'<th>% do tempo do operador</th>':''}<th>Ocioso (h)</th><th>% ocioso</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th></tr>`;
+ document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0&&m.length>1?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td>${v1?`<td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td>`:''}<td>${fh(x.o||0)}</td><td style="color:${co((x.o||0)/(x.h||1))};font-weight:700">${pc((x.o||0)/(x.h||1),1)}</td><td>${fh(x.x||0)}</td><td style="color:#d64550;font-weight:700">${pc((x.x||0)/(x.h||1),1)}</td></tr>`).join('')
   +(m.length>1?`<tr><td><b>Total</b></td><td></td><td><b>${fh(tot)}</b></td><td></td><td><b>${fh(to)}</b></td><td style="color:${co(to/tot)};font-weight:700">${pc(to/tot,1)}</td><td><b>${fh(tx)}</b></td><td style="color:#d64550;font-weight:700">${pc(tx/tot,1)}</td></tr>`:'')
-  ||'<tr><td colspan="8">Sem registros desse operador no monit.</td></tr>';
- document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit e, delas, o motor ocioso (meta 10%; vermelho acima, verde abaixo) e o tempo com o motor acima de 2.000 RPM. Com mais de uma colhedora, a primeira é a principal, que aparece ao lado do nome nos rankings.';
+  ||'<tr><td colspan="7">Sem registros desse operador no monit.</td></tr>';
+ document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit e, delas, o motor ocioso (meta 10%; vermelho acima, verde abaixo) e o tempo com o motor acima de 2.000 RPM. Com mais de uma colhedora, "% do tempo do operador" mostra como as horas dele se dividem entre elas, e a primeira é a principal, que aparece ao lado do nome nos rankings.';
  document.getElementById('dlg').hidden=false;document.getElementById('dlg-x').focus();}
 let VOLTA=null,CTX=null;
 const opLink=(op,txt)=>`<a href="#" class="lk lk-op" data-op="${encodeURIComponent(op)}" title="Ver colhedoras, motor ocioso e RPM de ${op}">${txt}</a>`;
