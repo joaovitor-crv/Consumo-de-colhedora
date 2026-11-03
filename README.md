@@ -26,8 +26,9 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 1. Baixe o PDF do **Indicador Consumo de Combustível — Colhedoras** (a última coluna de semana define o período; `--coluna N` escolhe outra, 1 = primeira) e as exportações do **monit** da mesma semana (CSV com `;`).
 2. Rode:
    ```
-   python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv --frentes 1,2,3,5,6
+   python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv --monit-anterior MONIT_SEMANA_ANTERIOR.csv --frentes 1,2,3,5,6
    ```
+   Quando o PDF traz a semana anterior ao lado, o relatório compara com ela: nos cartões do topo (valor anterior e variação), na coluna "vs" da tabela (diferença de L/h por colhedora e por frente) e nos gráficos de L/h e L/t por frente (barra cinza = semana anterior). Com `--monit-anterior`, compara também o motor ocioso e o tempo acima de 2.000 RPM (geral e por frente). Sem semana anterior no PDF, a página sai como antes.
 3. O `index.html` é refeito com o layout padrão (`gerar/modelo.html`). Publique com commit e push.
 
 Precisa de Python 3 e `pdftotext` (poppler-utils). Para mudar o visual, edite `gerar/modelo.html` (os dados entram no lugar de `__DADOS__`).

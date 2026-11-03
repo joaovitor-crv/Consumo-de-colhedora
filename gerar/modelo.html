@@ -27,6 +27,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font)}
 .kpi div{display:flex;flex-direction:column;align-items:center;flex:1;min-width:0;text-align:center}
 .kpi .v{font-weight:700;font-size:13px;color:var(--navy);white-space:nowrap;font-variant-numeric:tabular-nums}
 .kpi .l{font-size:12px;font-weight:600;color:var(--navy);white-space:nowrap}
+.kpi .a{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;font-variant-numeric:tabular-nums}
+.kpi .a b{font-weight:700}.kpi .a .up{color:var(--red)}.kpi .a .dn{color:var(--green)}
+.cmp{margin:2px 0 6px;font-size:12px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}.cmp b{color:var(--ink)}.cmp .up{color:var(--red);font-weight:700}.cmp .dn{color:var(--green);font-weight:700}
+.tv.cmpx td,.tv.cmpx th{padding-left:3px;padding-right:3px}.tv.cmpx td:first-child{padding-left:10px}
+.tv td.dv{font-size:10.5px;font-weight:700;padding:2px 3px}.tv th#th-ant{font-size:10.5px;padding:8px 2px;line-height:1.15}.tv td.dv.up{color:var(--red)}.tv td.dv.dn{color:var(--green)}
 .kpi .v.gray{color:var(--gray)} .kpi .v.green{color:var(--green)} .kpi .v.red{color:var(--red)}
 .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,.82fr);gap:10px;align-items:start}
 .col{display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -91,7 +96,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
   <div class="grid">
     <div class="col">
       <section class="card"><h2>Acompanhamento por colhedora</h2>
-        <div class="tw"><table class="tv"><thead><tr><th>Frotas</th><th>Litros</th><th>Horas</th><th>L/h</th><th>Meta L/h</th><th>Toneladas</th><th>L/t</th><th>% Ocioso</th><th>Paradas</th></tr></thead><tbody id="tab"></tbody></table></div>
+        <div class="tw"><table class="tv"><thead><tr><th>Frotas</th><th>Litros</th><th>Horas</th><th>L/h</th><th id="th-ant" hidden>vs sem. ant.</th><th>Meta L/h</th><th>Toneladas</th><th>L/t</th><th>% Ocioso</th><th>Paradas</th></tr></thead><tbody id="tab"></tbody></table></div>
       </section>
       <section class="card"><h2>Motor ocioso por motivo (horas)</h2>
         <div class="cb">
@@ -106,7 +111,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
     <div class="col">
       <section class="card"><h2>Registros de motor ocioso</h2>
         <div class="cb">
-          <h3 class="sub" style="margin-top:2px">% de motor ocioso por colhedora (meta 10%)</h3><p class="note dica">Clique numa colhedora para ver os operadores.</p>
+          <h3 class="sub" style="margin-top:2px">% de motor ocioso por colhedora (meta 10%)</h3><p class="cmp" id="cmp-oc" hidden></p><p class="note dica">Clique numa colhedora para ver os operadores.</p>
           <div class="chart" id="c-ocfx"></div>
           <div class="split">
             <div><h3 class="sub" style="margin-top:0">Horas ociosas (top 10)</h3><div class="chart" id="c-octop"></div></div>
@@ -122,16 +127,16 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Ao lado do nome: frente e colhedora em que mais trabalhou (+N = outras colhedoras; <b>clique no operador com +N para ver todas</b>). Vermelho: acima da meta de 10%.</p></div>
       </section>
       <section class="card"><h3>Litros por hora por frente</h3>
-        <div class="cb"><div class="leg"><span><i style="background:var(--green)"></i>Dentro da meta (32,00)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
+        <div class="cb"><div class="leg"><span class="leg-ant" hidden><i style="background:#c3c8d4"></i><span class="per-ant"></span></span><span><i style="background:var(--green)"></i>Dentro da meta (32,00)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
       </section>
       <section class="card"><h3>Litros por tonelada por frente</h3>
-        <div class="cb"><div class="chart" id="c-lt"></div></div>
+        <div class="cb"><div class="leg leg-ant" hidden><span><i style="background:#c3c8d4"></i><span class="per-ant"></span></span><span><i style="background:#22378c"></i>Semana atual</span></div><div class="chart" id="c-lt"></div></div>
       </section>
     </div>
 
     <div class="col">
       <section class="card"><h3>Faixa de RPM do motor</h3>
-        <div class="cb"><div class="chart" id="c-rpm"></div>
+        <div class="cb"><div class="chart" id="c-rpm"></div><p class="cmp" id="cmp-rpm" hidden></p>
           <h3 class="sub">Faixa de RPM por frente</h3>
           <div class="chart" id="c-rpmfr"></div>
           <div class="leg" id="leg-rpm"></div><h3 class="sub">Operadores acima de 2.000 RPM por frente</h3><div id="fr-ops"></div><p class="note" style="text-align:center">Os 3 operadores de cada frente com mais tempo acima de 2.000 RPM (% do tempo de motor ligado). Clique na frente para ver todos.</p>
@@ -201,19 +206,27 @@ const IC={
 const K=D.K;
 const kpis=[['bomba',f2(K.litros),'Litros Abast',''],['caminhao',f0(K.frotas),'Colhedoras',''],['estrada',f2(K.ton),'Toneladas',''],
  ['relogio',f2(K.lh),'Média L/h',K.lh<=K.meta_lh?'green':'red'],['alvo',f2(K.meta_lh),'Meta L/h','green'],['grafico',f2(K.lt),'Média L/t','gray'],['raio',fh(K.horas_oc)+' h ('+pc(K.pct_oc,1)+')','Motor Ocioso','red']];
-document.getElementById('kpis').innerHTML=kpis.map(([i,v,l,c])=>`<div class="kpi"><svg viewBox="0 0 30 30" aria-hidden="true">${IC[i]}</svg><div><span class="v ${c}">${v}</span><span class="l">${l}</span></div></div>`).join('');
+const A=D.ant,AK=A&&A.K;
+/* variação contra a semana anterior: menor é melhor em L/h, L/t e ocioso; litros e toneladas só mostram a variação */
+const var_=(a,b,menor)=>{if(a==null||b==null||!a)return '';const d=(b-a)/a*100,cl=menor==null||Math.abs(d)<.05?'':((d<0)===menor?'dn':'up');return `<b class="${cl}">${d>0?'▲ +':d<0?'▼ −':''}${f1(Math.abs(d))}%</b>`};
+const antK=AK?{bomba:[f0(AK.litros),var_(AK.litros,K.litros)],estrada:[f0(AK.ton),var_(AK.ton,K.ton)],relogio:[f2(AK.lh),var_(AK.lh,K.lh,true)],grafico:[f2(AK.lt),var_(AK.lt,K.lt,true)],
+ raio:A.pct_oc!=null?[pc(A.pct_oc,1),var_(A.pct_oc,K.pct_oc,true)]:null}:{};
+document.getElementById('kpis').innerHTML=kpis.map(([i,v,l,c])=>`<div class="kpi"><svg viewBox="0 0 30 30" aria-hidden="true">${IC[i]}</svg><div><span class="v ${c}">${v}</span><span class="l">${l}</span>${antK[i]?`<span class="a" title="Semana ${A.periodo}: ${antK[i][0]}">ant. ${antK[i][0]} ${antK[i][1]}</span>`:''}</div></div>`).join('');
 document.getElementById('periodo').textContent='PERÍODO '+D.periodo;
 
 /* tabela */
 const kc=v=>v==null?'':(v<=K.meta?'kgn':(v<=1.15?'kg':(v<=1.5?'ky':'kr')));
 const tb=document.getElementById('tab');
-D.tabela.forEach(g=>{const r=tb.insertRow();r.className='g';const c=r.insertCell();c.colSpan=9;c.textContent=g.grupo;
+/* célula da variação de L/h contra a semana anterior (diferença em L/h) */
+const dvc=(a,b)=>{if(a==null||b==null)return ['',''];const d=b-a;if(Math.abs(d)<.005)return ['=','dv'];return [(d<0?'▼':'▲')+f2(Math.abs(d)),'dv '+(d<0?'dn':'up')]};
+if(A){tb.closest('table').classList.add('cmpx');document.getElementById('th-ant').hidden=false;document.getElementById('th-ant').innerHTML='vs<br>'+A.periodo.replace(' a ','–')}
+D.tabela.forEach(g=>{const r=tb.insertRow();r.className='g';const c=r.insertCell();c.colSpan=A?10:9;c.textContent=g.grupo;
  g.linhas.forEach(x=>{const tr=tb.insertRow();const z=v=>v==null||v===0;
-  [[String(x.frota),''],[z(x.litros)?'':f0(x.litros),'i'],[z(x.horas)?'-':fh(x.horas),''],[x.lh==null?'':f2(x.lh),'i lh '+(x.lh<=K.meta_lh?'kgn':'kr')],[x.lh==null?'':f2(K.meta_lh),'meta'],
+  [[String(x.frota),''],[z(x.litros)?'':f0(x.litros),'i'],[z(x.horas)?'-':fh(x.horas),''],[x.lh==null?'':f2(x.lh),'i lh '+(x.lh<=K.meta_lh?'kgn':'kr')],...(A?[dvc(A.frota[String(x.frota)],x.lh)]:[]),[x.lh==null?'':f2(K.meta_lh),'meta'],
    [x.ton==null?'':f0(x.ton),'ton'],[x.lt==null?'':f2(x.lt),'i'],[x.pct==null?'':pc(x.pct,1),x.pct!=null&&x.pct>D.meta_oc?'kr':''],[x.paradas==null?'':f0(x.paradas),'i']]
   .forEach(([t,cl])=>{const td=tr.insertCell();td.textContent=t;if(cl)td.className=cl})});
  if(g.tot){const T=g.tot,tr=tb.insertRow();tr.className='t';
-  [['Total',''],[f0(T.litros),''],[fh(T.horas),''],[f2(T.lh),'lh '+(T.lh<=K.meta_lh?'kgn':'kr')],[f2(K.meta_lh),'meta'],[f0(T.ton),'ton'],[f2(T.lt),''],['',''],['','']]
+  [['Total',''],[f0(T.litros),''],[fh(T.horas),''],[f2(T.lh),'lh '+(T.lh<=K.meta_lh?'kgn':'kr')],...(A?[dvc((A.frentes.find(f=>f.l===g.grupo.replace('FRENTE','Frente'))||{}).lh,T.lh)]:[]),[f2(K.meta_lh),'meta'],[f0(T.ton),'ton'],[f2(T.lt),''],['',''],['','']]
   .forEach(([t,cl])=>{const td=tr.insertCell();td.textContent=t;if(cl)td.className=cl})}});
 /* barras verticais com rótulo em cima (estilo Power BI) */
 function vbars(id,rows,opt){const box=document.getElementById(id);const W=opt.w||560,H=opt.h||150,top=26,bot=opt.bot||40;
@@ -224,6 +237,14 @@ function vbars(id,rows,opt){const box=document.getElementById(id);const W=opt.w|
   String(r.l).split('\n').forEach((ln,k)=>el('text',{x:cx,y:H-bot+16+k*14,'text-anchor':'middle','font-size':12},s,ln));});
  if(opt.line){const yv=H-bot-(H-top-bot)*opt.line/max;el('line',{x1:slot*.3,x2:W-slot*.3,y1:yv,y2:yv,stroke:'#22378c','stroke-width':3},s)}}
 
+/* barras verticais lado a lado: semana anterior (cinza) e atual */
+function vpar(id,rows,opt){const box=document.getElementById(id);const W=600,H=170,top=30,bot=30;
+ const s=svg(box,W,H);const max=Math.max(...rows.flatMap(r=>[r.a||0,r.v||0]),1);const slot=W/rows.length;const bw=Math.min(40,slot*.32);
+ rows.forEach((r,i)=>{const cx=slot*i+slot/2;[[r.a,'#c3c8d4',cx-bw/2-2,'ant'],[r.v,opt.color(r.v),cx+bw/2+2,'atual']].forEach(([v,c,x,k])=>{if(v==null)return;
+   const h=Math.max(2,(H-top-bot)*v/max*.92),y=H-bot-h;const rc=el('rect',{x:x-bw/2,y,width:bw,height:h,fill:c},s);hover(rc,box,`${r.l} · ${k==='ant'?A.periodo:'semana atual'}: ${f2(v)}`);
+   el('text',{x,y:y-6,'text-anchor':'middle','font-size':k==='ant'?11:12.5,'font-weight':k==='ant'?400:700,fill:k==='ant'?'#5b6475':'#1d2433'},s,f2(v))});
+  if(r.a!=null&&r.v!=null){const d=r.v-r.a;el('text',{x:cx,y:H-bot+28,'text-anchor':'middle','font-size':10.5,'font-weight':700,fill:Math.abs(d)<.005?'#5b6475':d<0?'#2e7d32':'#d64550'},s,(d<0?'▼ ':d>0?'▲ +':'')+f2(Math.abs(d)))}
+  el('text',{x:cx,y:H-bot+14,'text-anchor':'middle','font-size':12},s,r.l)})}
 /* barras horizontais com valor à direita */
 function hbars(id,rows,opt){const box=document.getElementById(id);const W=opt.w||300,rh=opt.rh||23,lw=opt.lw||56,H=rows.length*rh+6;
  const s=svg(box,W,H);const max=Math.max(...rows.map(r=>r.v),1e-9);const bwMax=W-lw-opt.vw;
@@ -337,8 +358,19 @@ meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${
 linha('c-ocdia',D.oc_dia,D.meta_oc,{w:380,h:120,fmt:v=>NF(0)(v*100)+'%',lo:0,hi:1.25,area:true});
 
 /* L/t e litros */
+if(A){document.querySelectorAll('.leg-ant').forEach(e=>e.hidden=false);document.querySelectorAll('.per-ant').forEach(e=>e.textContent=A.periodo);
+ const ant=k=>l=>(A.frentes.find(f=>f.l===l)||{})[k];
+ vpar('c-lh',D.frentes.map(r=>({l:r.l,a:ant('lh')(r.l),v:r.lh})),{color:v=>v<=K.meta_lh?'#2e7d32':'#d64550'});
+ vpar('c-lt',D.frentes.map(r=>({l:r.l,a:ant('lt')(r.l),v:r.lt})),{color:()=>'#22378c'});
+}else{
 vbars('c-lh',D.frentes.map(r=>({l:r.l,v:r.lh})),{w:600,h:150,fmt:f2,bw:60,bot:28,scale:.92,color:r=>r.v<=K.meta_lh?'#2e7d32':'#d64550'});
-vbars('c-lt',D.frentes.map(r=>({l:r.l,v:r.lt})),{w:600,h:150,fmt:f2,bw:60,bot:28,scale:.92});
+vbars('c-lt',D.frentes.map(r=>({l:r.l,v:r.lt})),{w:600,h:150,fmt:f2,bw:60,bot:28,scale:.92});}
+/* ocioso e RPM: linha com a semana anterior */
+const cmp=(id,html)=>{const e=document.getElementById(id);e.innerHTML=html;e.hidden=false};
+const seta=(a,b)=>{const d=(b-a)*100;return Math.abs(d)<.05?'(igual)':`<span class="${d<0?'dn':'up'}">${d<0?'▼ −':'▲ +'}${f1(Math.abs(d))} p.p.</span>`};
+if(A&&A.pct_oc!=null)cmp('cmp-oc',`Total: <b>${pc(K.pct_oc,1)}</b> · ${A.periodo}: ${pc(A.pct_oc,1)} ${seta(A.pct_oc,K.pct_oc)}`);
+if(A&&A.rpm_exc!=null){const ex=D.rpm[D.rpm.length-1].v;const pf=(D.rpm_frente||[]).map(f=>A.rpm_frente[f.l]==null?'':`${f.l.replace('Frente ','F')} ${pc(f.b5,0)} ${seta(A.rpm_frente[f.l],f.b5)}`).filter(Boolean).join(' · ');
+ cmp('cmp-rpm',`Acima de 2.000: <b>${pc(ex,1)}</b> · ${A.periodo}: ${pc(A.rpm_exc,1)} ${seta(A.rpm_exc,ex)}<br>${pf}`)}
 
 
 /* RPM */

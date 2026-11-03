@@ -7,6 +7,8 @@ Uso:
   "Indicador Consumo de Combustível — Colhedoras". Quando o PDF traz várias semanas lado a lado,
   usa a última (a mais recente); --coluna N escolhe outra (1 = primeira). O período do relatório é o dessa coluna.
 - Motor ocioso, paradas, RPM, motivos, turnos e operadores: exportação do monit (CSV com ';').
+- Comparação com a semana anterior: a coluna do PDF antes da usada (L/h, L/t, litros, horas, t);
+  com --monit-anterior, também motor ocioso e tempo acima de 2.000 RPM.
 - Requer pdftotext (poppler-utils).
 
 Desenvolvido por João Vitor - CRV
@@ -89,6 +91,7 @@ def ler_pdf(caminho, frentes, coluna=None):
         raise SystemExit(f"Frente(s) {falta} não encontrada(s) no PDF.")
     m1 = re.search(r"(\d{5}(?:,\s*\d{5})*):\s*vieram", txt)
     m2 = re.search(r"integrado só até (\d{2}/\d{2}/\d{4})", txt)
+    totais["_k"] = k
     totais["_aviso"] = (f"Atenção (do indicador): {m1.group(1) if m1 else 'algumas frotas'} têm o abastecimento lançado à mão, "
                         f"integrado só até {m2.group(1)}; o diesel da semana depois dessa data pode estar incompleto.") if m2 else None
     return ini, fim, (atual.group(1) if atual else ""), grupos, totais
@@ -258,11 +261,43 @@ def calcular(rows, fim_dt):
                  oc_bruto=tot["oc_bruto"] / 3600, paradas=tot["paradas"], paradas_90=tot["paradas_90"]))
 
 
+def soma_frentes(grupos, totais, frentes):
+    """Totais por frente e do conjunto das frentes escolhidas (mesma regra da semana atual)."""
+    fr = []
+    for f in frentes:
+        T = dict(totais.get(f) or dict(
+            horas=sum(x["horas"] or 0 for x in grupos[f]), litros=sum(x["litros"] or 0 for x in grupos[f]),
+            ton=sum(x["ton"] or 0 for x in grupos[f])))
+        T.setdefault("lh", T["litros"] / T["horas"] if T["horas"] else None)
+        T.setdefault("lt", T["litros"] / T["ton"] if T["ton"] else None)
+        fr.append(dict(l=f"Frente {f}", **T))
+    L = sum(x["litros"] or 0 for x in fr); H = sum(x["horas"] or 0 for x in fr); T = sum(x["ton"] or 0 for x in fr)
+    return fr, dict(litros=L, horas=H, ton=T, lh=L / H if H else None, lt=L / T if T else None)
+
+
+def anterior(a, frentes, k):
+    """Semana anterior: a coluna do PDF antes da usada e, se houver, o monit dela."""
+    if not k:
+        return None
+    ini, fim, _, grupos, totais = ler_pdf(a.pdf, frentes, k)
+    fr, K = soma_frentes(grupos, totais, frentes)
+    ant = dict(periodo=f"{ini[:5]} a {fim[:5]}", K=K, frentes=[dict(l=x["l"], lh=x["lh"], lt=x["lt"]) for x in fr],
+               frota={str(x["frota"]): x["lh"] for f in frentes for x in grupos[f]})
+    if a.monit_anterior:
+        rows, fim_dt = ler_monit(a.monit_anterior, frentes, ini, fim)
+        M = calcular(rows, fim_dt); t = M["tot"]
+        ant.update(horas_oc=t["oc"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0, rpm_exc=M["rpm"][-1]["v"],
+                   rpm_frente={r["l"]: r["b5"] for r in M["rpm_frente"]},
+                   oc={eq: x["pct"] for eq, x in M["F"].items() if x["pct"] is not None})
+    return ant
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pdf", required=True)
     ap.add_argument("--monit", required=True, nargs="+")
     ap.add_argument("--frentes", default="1,2,3,5,6")
+    ap.add_argument("--monit-anterior", nargs="+", help="monit da semana anterior, para comparar ocioso e RPM")
     ap.add_argument("--coluna", type=int, help="coluna de período do PDF (1 = primeira); padrão: a última")
     ap.add_argument("--saida", default=os.path.join(AQUI, "..", "index.html"))
     a = ap.parse_args()
@@ -272,6 +307,7 @@ def main():
     rows, fim_dt = ler_monit(a.monit, frentes, ini, fim)
     M = calcular(rows, fim_dt)
 
+    ant = anterior(a, frentes, totais["_k"])
     tab, fr, sem, sem_monit = [], [], [], []
     for f in frentes:
         linhas = []
@@ -296,7 +332,7 @@ def main():
         K=dict(litros=TL, frotas=sum(len(g["linhas"]) for g in tab), ton=TT, lt=TL / TT if TT else 0, meta=META_LT,
                horas=TH, lh=TL / TH if TH else 0, meta_lh=META_LH, horas_oc=t["oc"], horas_oc_bruto=t["oc_bruto"],
                paradas=t["paradas"], paradas_90=t["paradas_90"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0),
-        tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit,
+        tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit, ant=ant,
         **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "outros", "rpm_frente_op", "oc_turno", "oc_op", "longas"]},
         notas=[
             f"Litros, horas, toneladas, L/h e L/t: semana de {ini[:5]} a {fim} do Indicador de Consumo de Combustível — Colhedoras"
