@@ -226,7 +226,8 @@ def calcular(rows, fim_dt):
 
     def maquinas(o):
         """Máquinas e frentes em que o operador trabalhou, da que teve mais horas de motor ligado para a que teve menos."""
-        m = [dict(eq=eq, fr=eq_g.get(eq, "").replace("FRENTE ", "F"), h=h / 3600) for (eq, op), h in ep_l.items() if op == o and h >= 900]
+        m = [dict(eq=eq, fr=eq_g.get(eq, "").replace("FRENTE ", "F"), h=h / 3600, x=ep_x[(eq, op)] / 3600)
+             for (eq, op), h in ep_l.items() if op == o and h >= 900]
         return sorted(m, key=lambda r: -r["h"])
 
     ops = [dict(l=o, v=op_o[o] / op_l[o], lig=op_l[o] / 3600, oc=op_o[o] / 3600, maq=maquinas(o),

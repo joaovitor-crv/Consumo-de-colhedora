@@ -312,10 +312,11 @@ function detalhe(eq,modo){const L=(D.det||{})[eq]||[];const dlg=document.getElem
 function maquinas(r){const m=[...(r.maq||[])].sort((a,b)=>b.h-a.h);const tot=m.reduce((a,x)=>a+x.h,0)||1;const mx=Math.max(...m.map(x=>x.h),.01);
  document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent=`${nomeCurto(r.l)} — colhedoras operadas`;
  document.getElementById('dlg-s').textContent=r.l;
- document.getElementById('dlg-h').innerHTML='<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th></tr>';
- document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td></tr>`).join('')
-  +`<tr><td><b>Total</b></td><td></td><td><b>${fh(tot)}</b></td><td></td></tr>`;
- document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit. A primeira é a que aparece ao lado do nome; as demais formam o +N.';
+ document.getElementById('dlg-h').innerHTML='<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th></tr>';
+ const tx=m.reduce((a,x)=>a+(x.x||0),0);
+ document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td><td>${fh(x.x||0)}</td><td style="color:#d64550;font-weight:700">${pc((x.x||0)/(x.h||1),1)}</td></tr>`).join('')
+  +`<tr><td><b>Total</b></td><td></td><td><b>${fh(tot)}</b></td><td></td><td><b>${fh(tx)}</b></td><td style="color:#d64550;font-weight:700">${pc(tx/tot,1)}</td></tr>`;
+ document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit e, delas, o tempo com o motor acima de 2.000 RPM. A primeira é a que aparece ao lado do nome; as demais formam o +N.';
  document.getElementById('dlg').hidden=false;document.getElementById('dlg-x').focus();}
 function outros(){const L=[...(D.outros||[])].sort((a,b)=>b.v-a.v);const tot=L.reduce((a,x)=>a+x.v,0)||1;const all=D.motivo.reduce((a,x)=>a+x.v,0)||1;const mx=Math.max(...L.map(x=>x.v),.01);
  document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent='Motor ocioso — motivos dentro de "Outros"';
