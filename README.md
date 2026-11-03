@@ -12,7 +12,7 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 
 ## Regras
 - Frentes 1, 2, 3, 5 e 6. Colhedoras sem telemetria aparecem só com os dados de consumo.
-- L/h = litros abastecidos no período ÷ horas trabalhadas. Meta 32,00 L/h.
+- L/h = litros abastecidos no período ÷ horas trabalhadas. Meta 34,00 L/h (até 02/11/2026 era 32,00).
 - L/t = litros ÷ toneladas, só colhedoras com abastecimento e pesagem.
 - Motor ocioso = estado PARADA com motor ligado (monit). Cada parada (sequência contínua de leituras paradas com motor ligado) tem 90 segundos descontados; paradas de até 90 s não contam. Nas colhedoras 850 RPM é a marcha lenta real. Meta 10% das horas de motor ligado.
 - Horas = horímetro do abastecimento: maior leitura do período − maior leitura do último dia de abastecimento antes do período.

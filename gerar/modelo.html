@@ -127,7 +127,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         <div class="cb"><div class="chart" id="c-op"></div><p class="note">Os 10 operadores com maior % de motor ocioso, entre os que tiveram pelo menos 5 h de motor ligado na semana. Ao lado do nome: frente e colhedora em que mais trabalhou (+N = outras colhedoras; <b>clique no operador com +N para ver todas</b>). Vermelho: acima da meta de 10%.</p></div>
       </section>
       <section class="card"><h3>Litros por hora por frente</h3>
-        <div class="cb"><div class="leg"><span class="leg-ant" hidden><i style="background:#c3c8d4"></i><span class="per-ant"></span></span><span><i style="background:var(--green)"></i>Dentro da meta (32,00)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
+        <div class="cb"><div class="leg"><span class="leg-ant" hidden><i style="background:#c3c8d4"></i><span class="per-ant"></span></span><span><i style="background:var(--green)"></i>Dentro da meta (<span class="meta-lh"></span>)</span><span><i style="background:var(--red)"></i>Acima da meta</span></div><div class="chart" id="c-lh"></div></div>
       </section>
       <section class="card"><h3>Litros por tonelada por frente</h3>
         <div class="cb"><div class="leg leg-ant" hidden><span><i style="background:#c3c8d4"></i><span class="per-ant"></span></span><span><i style="background:#22378c"></i>Semana atual</span></div><div class="chart" id="c-lt"></div></div>
@@ -165,7 +165,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
       <li>Litros, horas, toneladas, L/h e L/t: semana do relatório no Indicador de Consumo de Combustível — Colhedoras (abastecimento e pesagem do CHB). Motor ocioso, paradas, RPM, motivos e turnos: monit.</li>
       <li>__FRENTES__. L/t da frente = litros da frente ÷ toneladas da frente, como no indicador.</li>
       <li>Motor ocioso = estado PARADA com motor ligado (monit). Cada parada é uma sequência contínua de leituras paradas com motor ligado; de cada parada são descontados 90 segundos (paradas de até 90 s não contam). Paradas = total de paradas com motor ligado no período. Nas colhedoras, 850 RPM é a marcha lenta real e conta como motor ligado. % ocioso = horas ociosas ÷ horas de motor ligado; meta 10%.</li>
-      <li>Meta 32,00 L/h: verde até a meta, vermelho acima. Motor ocioso e % ocioso são calculados pelo monit.</li>
+      <li>Meta <span class="meta-lh"></span> L/h: verde até a meta, vermelho acima. Motor ocioso e % ocioso são calculados pelo monit.</li>
       <li>Turnos: A 07–15h, B 15–23h, C 23–07h.</li>
       <li>Horas em horas:minutos (ex.: 0:30 = 30 minutos; 57:30 = 57 horas e 30 minutos). L/h continua calculado com as horas decimais.</li>
       <li>Faixa de RPM = % do tempo de motor ligado em cada faixa de rotação (monit). Faixas: 1-900, 901-1.500, 1.501-1.800, 1.801-1.900, 1.901-2.000 e 2.001+. Excesso de RPM = acima de 2.000 (faixa 2.001+).</li>
@@ -217,6 +217,7 @@ const antK=AK?{bomba:[f0(AK.litros),var_(AK.litros,K.litros)],estrada:[f0(AK.ton
  raio:A.pct_oc!=null?[pc(A.pct_oc,1),var_(A.pct_oc,K.pct_oc,true)]:null}:{};
 document.getElementById('kpis').innerHTML=kpis.map(([i,v,l,c])=>`<div class="kpi"><svg viewBox="0 0 30 30" aria-hidden="true">${IC[i]}</svg><div><span class="v ${c}">${v}</span><span class="l">${l}</span>${antK[i]?`<span class="a" title="Semana ${A.periodo}: ${antK[i][0]}">ant. ${antK[i][0]} ${antK[i][1]}</span>`:''}</div></div>`).join('');
 document.getElementById('periodo').textContent='PERÍODO '+D.periodo;
+document.querySelectorAll('.meta-lh').forEach(e=>e.textContent=f2(K.meta_lh));
 
 /* tabela */
 const kc=v=>v==null?'':(v<=K.meta?'kgn':(v<=1.15?'kg':(v<=1.5?'ky':'kr')));

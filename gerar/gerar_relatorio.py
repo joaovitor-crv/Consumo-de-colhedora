@@ -25,7 +25,7 @@ from datetime import datetime, timedelta
 AQUI = os.path.dirname(os.path.abspath(__file__))
 CAP = 600          # cada leitura do monit vale no máximo 10 min
 DESCONTO = 90      # segundos descontados de cada parada com motor ligado
-META_LH, META_LT, META_OC = 32.0, 1.0, 0.10
+META_LH, META_LT, META_OC = 34.0, 1.0, 0.10  # meta de L/h: 34,00 desde 03/11/2026 (antes 32,00)
 MIN_H = 5 * 3600   # mínimo de motor ligado para entrar nos rankings (operador e RPM)
 ROMANO = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8, "IX": 9, "X": 10}
 BANDAS = ["1 - 900 (lenta)", "901 - 1.500", "1.501 - 1.800", "1.801 - 1.900", "1.901 - 2.000", "2.001+"]

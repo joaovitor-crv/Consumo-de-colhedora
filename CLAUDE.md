@@ -31,7 +31,7 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
   - Laranja: 1.901–2.000.
   - Vermelho: 2.001+ (excesso).
 - **Faixas de RPM** (30/10/2026): 1–900, 901–1.500, 1.501–1.800, 1.801–1.900, 1.901–2.000 e 2.001+, no gráfico geral e por frente.
-- **Metas**: 32,00 L/h e 10% de motor ocioso.
+- **Metas**: 34,00 L/h (alterada de 32,00 a pedido do usuário em 03/11/2026; o valor fica só em `META_LH` no gerador) e 10% de motor ocioso.
 - **Horas** sempre exibidas em horas:minutos (0:30 = 30 min; 57:30), nunca no decimal do Solinftec; os cálculos (L/h, %) usam as horas decimais (30/10/2026).
 - **Motor ocioso**:
   - É a sequência de leituras em PARADA com motor ligado (Sim ou RPM ≥ 700).
