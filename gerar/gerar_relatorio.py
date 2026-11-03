@@ -3,8 +3,9 @@
 Uso:
   python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv [--frentes 1,2,3]
 
-- Consumo (horas, diesel, L/h, toneladas, L/t): coluna SEMANA do PDF
-  "Indicador Consumo de Combustível — Colhedoras". O período do relatório é o da SEMANA.
+- Consumo (horas, diesel, L/h, toneladas, L/t): uma coluna do PDF
+  "Indicador Consumo de Combustível — Colhedoras". Quando o PDF traz várias semanas lado a lado,
+  usa a última (a mais recente); --coluna N escolhe outra (1 = primeira). O período do relatório é o dessa coluna.
 - Motor ocioso, paradas, RPM, motivos, turnos e operadores: exportação do monit (CSV com ';').
 - Requer pdftotext (poppler-utils).
 
@@ -41,12 +42,23 @@ def br(v, d):
 
 
 # ---------------- PDF do indicador ----------------
-def ler_pdf(caminho, frentes):
+def colunas(t, n):
+    """Separa os números de uma linha em colunas de 5 valores (horas, diesel, L/h, t, L/t); o ✓/✗ de cada coluna é ignorado."""
+    vals = [x for x in t if x not in ("✓", "✗")]
+    return [vals[i:i + 5] for i in range(0, len(vals) - len(vals) % 5, 5)][:n]
+
+
+def ler_pdf(caminho, frentes, coluna=None):
     txt = subprocess.run(["pdftotext", "-layout", caminho, "-"], capture_output=True, text=True, check=True).stdout
     per = re.findall(r"(\d{2}/\d{2}/\d{4}) a (\d{2}/\d{2}/\d{4}) · \d+ dias", txt)
+    per = list(dict.fromkeys(per))  # o cabeçalho se repete em cada página
     if not per:
         raise SystemExit("Não achei o período da SEMANA no PDF.")
-    ini, fim = per[0]
+    k = (coluna - 1) if coluna else len(per) - 1
+    if not 0 <= k < len(per):
+        raise SystemExit(f"O PDF tem {len(per)} coluna(s) de período; --coluna {coluna} não existe.")
+    ini, fim = per[k]
+    n = len(per)
     atual = re.search(r"Atualizado em (\d{2}/\d{2}/\d{4} \d{2}:\d{2})", txt)
     grupos = collections.OrderedDict()
     totais = {}
@@ -64,12 +76,12 @@ def ler_pdf(caminho, frentes):
         if m:
             f = ROMANO.get(m.group(1))
             if f in frentes:
-                t = m.group(2).split()
+                t = colunas(m.group(2).split(), n)[k]
                 totais[f] = dict(horas=num(t[0]), litros=num(t[1]), lh=num(t[2]), ton=num(t[3]), lt=num(t[4]))
             continue
         m = re.match(r"^(\d{5})\s+ℓ/h\s+[\d,.]+\s+(.*)$", s)
         if m and atual_fr in frentes:
-            t = m.group(2).split()
+            t = colunas(m.group(2).split(), n)[k]
             grupos.setdefault(atual_fr, []).append(dict(
                 frota=int(m.group(1)), horas=num(t[0]), litros=num(t[1]), lh=num(t[2]), ton=num(t[3]), lt=num(t[4])))
     falta = [f for f in frentes if f not in grupos]
@@ -251,11 +263,12 @@ def main():
     ap.add_argument("--pdf", required=True)
     ap.add_argument("--monit", required=True, nargs="+")
     ap.add_argument("--frentes", default="1,2,3,5,6")
+    ap.add_argument("--coluna", type=int, help="coluna de período do PDF (1 = primeira); padrão: a última")
     ap.add_argument("--saida", default=os.path.join(AQUI, "..", "index.html"))
     a = ap.parse_args()
     frentes = [int(x) for x in a.frentes.split(",")]
 
-    ini, fim, atualizado, grupos, totais = ler_pdf(a.pdf, frentes)
+    ini, fim, atualizado, grupos, totais = ler_pdf(a.pdf, frentes, a.coluna)
     rows, fim_dt = ler_monit(a.monit, frentes, ini, fim)
     M = calcular(rows, fim_dt)
 
@@ -286,7 +299,7 @@ def main():
         tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit,
         **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "outros", "rpm_frente_op", "oc_turno", "oc_op", "longas"]},
         notas=[
-            f"Litros, horas, toneladas, L/h e L/t: coluna SEMANA ({ini[:5]} a {fim}) do Indicador de Consumo de Combustível — Colhedoras"
+            f"Litros, horas, toneladas, L/h e L/t: semana de {ini[:5]} a {fim} do Indicador de Consumo de Combustível — Colhedoras"
             + (f", atualizado em {atualizado}" if atualizado else "") + f". Frentes {nf}.",
             f"Motor ocioso, paradas, RPM, motivos, turnos e operadores: monit de {ini[:5]} a {fim}."
             + (f" Sem telemetria nesse período: {', '.join(sem)} ({'aparece' if len(sem) == 1 else 'aparecem'} na tabela só com os dados de consumo)." if sem else ""),

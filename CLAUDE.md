@@ -7,7 +7,7 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
 ```
 
 ## Entradas
-- PDF "INDICADOR CONSUMO DE COMBUSTÍVEL — COLHEDORAS". A coluna SEMANA define o período e traz horas, diesel, L/h, toneladas e L/t por frota e por frente.
+- PDF "INDICADOR CONSUMO DE COMBUSTÍVEL — COLHEDORAS". Quando o PDF traz várias semanas lado a lado (SEMANA, SEMANA 2, SAFRA...), o gerador usa a última coluna, a semana mais recente; `--coluna N` escolhe outra (1 = primeira) (03/11/2026). Essa coluna define o período e traz horas, diesel, L/h, toneladas e L/t por frota e por frente.
 - CSVs do monit (separados por `;`) da mesma semana.
 - Frentes padrão: 1, 2, 3, 5 e 6 (frentes 5 e 6 incluídas a pedido do usuário em 28/10/2026).
 

@@ -2,12 +2,12 @@
 
 Painel de acompanhamento do consumo de diesel das colhedoras com telemetria: litros por hora (L/h), litros por tonelada colhida (L/t), motor ocioso, faixa de RPM e motivos de parada.
 
-**Período atual:** 19/10/2026 a 25/10/2026 (frentes 1, 2, 3, 5 e 6)
+**Período atual:** 26/10/2026 a 01/11/2026 (frentes 1, 2, 3, 5 e 6)
 
 Abra o `index.html` ou acesse pelo GitHub Pages.
 
 ## Bases usadas
-- **Indicador de Consumo de Combustível — Colhedoras (PDF)**: coluna SEMANA, com horas, diesel, L/h, toneladas e L/t por frota e por frente.
+- **Indicador de Consumo de Combustível — Colhedoras (PDF)**: a coluna da semana do relatório (a última, quando o PDF traz várias semanas lado a lado), com horas, diesel, L/h, toneladas e L/t por frota e por frente.
 - **Monit**: exportação da telemetria (estado, motor ligado, RPM, operação) — motor ocioso, paradas, RPM, motivos e turnos.
 
 ## Regras
@@ -23,7 +23,7 @@ Abra o `index.html` ou acesse pelo GitHub Pages.
 - Cliques: colhedora nos rankings abre os operadores; operador com +N abre as outras colhedoras; "Outros" em motivos abre os motivos que estão dentro dele.
 
 ## Como gerar o relatório de uma nova semana
-1. Baixe o PDF do **Indicador Consumo de Combustível — Colhedoras** (a coluna SEMANA define o período) e as exportações do **monit** da mesma semana (CSV com `;`).
+1. Baixe o PDF do **Indicador Consumo de Combustível — Colhedoras** (a última coluna de semana define o período; `--coluna N` escolhe outra, 1 = primeira) e as exportações do **monit** da mesma semana (CSV com `;`).
 2. Rode:
    ```
    python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv --frentes 1,2,3,5,6
