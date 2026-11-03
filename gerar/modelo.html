@@ -66,7 +66,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
 .foot ul{margin:4px 0 0;padding-left:18px;display:grid;gap:2px}
 .dica{text-align:center;margin:0 0 4px;color:var(--navy);font-weight:600}
 .dlg{position:fixed;inset:0;background:rgba(20,30,60,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
-.dlg-c{background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.25)}
+.dlg-c{background:#fff;border-radius:12px;max-width:900px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 10px 40px rgba(0,0,0,.25)}
 .dlg-h{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;background:var(--navy);color:#fff;padding:10px 14px;position:sticky;top:0}
 .dlg-h b{display:block;font-size:14px}.dlg-h small{font-size:12px;opacity:.85}
 .dlg-h button{background:transparent;border:1px solid rgba(255,255,255,.6);color:#fff;border-radius:6px;font-size:14px;padding:2px 10px;cursor:pointer}
@@ -286,7 +286,7 @@ function meta_bars(id,rows,o){const box=document.getElementById(id);const W=o.w,
   const rc=el('rect',{x:lw,y:y+3,width:w,height:rh-7,fill:r.v>D.meta_oc?'#d64550':'#2e7d32'},s);hover(rc,box,r.t||`${r.l}: ${pc(r.v,1)}`);
   el('text',{x:lw+w+6,y:y+rh/2+4,'font-size':o.fs||12,'font-weight':700},s,pc(r.v,1));
   if(o.click)clicavel(s,box,0,y,W,rh,r,o.click,`${r.l}: ${pc(r.v,1)}`);
-  if(r.onclick){clicavel(s,box,0,y,W,rh,r,()=>r.onclick(),r.t||`${r.l}: ${pc(r.v,1)}`,'clique para ver as outras colhedoras')}});
+  if(r.onclick){clicavel(s,box,0,y,W,rh,r,()=>r.onclick(),r.t||`${r.l}: ${pc(r.v,1)}`,r.dica||'clique para ver as outras colhedoras')}});
  el('line',{x1:xm,x2:xm,y1:0,y2:rows.length*rh+6,stroke:'#22378c','stroke-width':2,'stroke-dasharray':'5 4'},s);
  el('text',{x:xm,y:rows.length*rh+18,'text-anchor':'middle','font-size':11,'font-weight':700,fill:'#22378c'},s,'meta 10%');}
 /* nome do operador com frente e máquina */
@@ -304,20 +304,24 @@ function detalhe(eq,modo){const L=(D.det||{})[eq]||[];const dlg=document.getElem
  const mOc=Math.max(...rows.map(r=>r.poc),D.meta_oc),mX=Math.max(...rows.map(r=>r.px),.01);
  document.getElementById('dlg-t').textContent=`Colhedora ${eq} — operadores`;
  document.getElementById('dlg-s').textContent=(modo==='rpm'?'Ordenado por % do tempo acima de 2.000 RPM':'Ordenado por % de motor ocioso')+' · clique no % ocioso para ver os apontamentos';
- ULT={eq,modo,rows};
- document.getElementById('dlg-b').innerHTML=rows.length?rows.map((r,i)=>`<tr><td title="${r.op}">${nm(r.op)}</td><td>${fh(r.lig)}</td>
+ ULT={eq,modo,rows};VOLTA=null;CTX=Object.assign(()=>detalhe(eq,modo),{txt:'← Voltar aos operadores da '+eq});
+ document.getElementById('dlg-b').innerHTML=rows.length?rows.map((r,i)=>`<tr><td title="${r.op}">${opLink(r.op,nm(r.op))}</td><td>${fh(r.lig)}</td>
    <td>${fh(r.oc)}</td><td class="${r.poc>D.meta_oc?'kr':'kgn'}">${(r.mot||[]).length?`<a class="lk" href="#" data-i="${i}" title="Ver os apontamentos do motor ocioso">${pc(r.poc,1)}</a>`:pc(r.poc,1)}${barra(r.poc,mOc,r.poc>D.meta_oc?'#d64550':'#2e7d32')}</td>
    <td>${fh(r.x)}</td><td class="${r.px>0?'kr':''}">${pc(r.px,1)}${barra(r.px,mX,'#d64550')}</td></tr>`).join(''):'<tr><td colspan="6">Sem operadores registrados no monit.</td></tr>';
  dlg.hidden=false;document.getElementById('dlg-x').focus();}
-function maquinas(r,modo){const oc=modo==='oc',val=x=>(oc?x.o:x.x)||0,cor=oc?(v=>v>D.meta_oc?'#d64550':'#2e7d32'):(()=>'#d64550');const m=[...(r.maq||[])].sort((a,b)=>b.h-a.h);const tot=m.reduce((a,x)=>a+x.h,0)||1;const mx=Math.max(...m.map(x=>x.h),.01);
- document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent=`${nomeCurto(r.l)} — colhedoras operadas`;
- document.getElementById('dlg-s').textContent=r.l;
- document.getElementById('dlg-h').innerHTML=`<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th>${oc?'<th>Ocioso (h)</th><th>% ocioso</th>':'<th>Acima 2.000 (h)</th><th>% acima 2.000</th>'}</tr>`;
- const tx=m.reduce((a,x)=>a+val(x),0);
- document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td><td>${fh(val(x))}</td><td style="color:${cor(val(x)/(x.h||1))};font-weight:700">${pc(val(x)/(x.h||1),1)}</td></tr>`).join('')
-  +`<tr><td><b>Total</b></td><td></td><td><b>${fh(tot)}</b></td><td></td><td><b>${fh(tx)}</b></td><td style="color:${cor(tx/tot)};font-weight:700">${pc(tx/tot,1)}</td></tr>`;
- document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit e, delas, '+(oc?'o motor ocioso (meta 10%)':'o tempo com o motor acima de 2.000 RPM')+'. A primeira é a que aparece ao lado do nome; as demais formam o +N.';
+function maquinas(nome,volta){const m=[...((D.op_maq||{})[nome]||[])].sort((a,b)=>b.h-a.h);const tot=m.reduce((a,x)=>a+x.h,0)||1;const mx=Math.max(...m.map(x=>x.h),.01);
+ const to=m.reduce((a,x)=>a+(x.o||0),0),tx=m.reduce((a,x)=>a+(x.x||0),0);const co=v=>v>D.meta_oc?'#d64550':'#2e7d32';
+ const bv=document.getElementById('dlg-v');VOLTA=volta||null;bv.hidden=!volta;if(volta)bv.textContent=volta.txt||'← Voltar';
+ document.getElementById('dlg-t').textContent=`${nomeCurto(nome)} — colhedoras operadas`;
+ document.getElementById('dlg-s').textContent=`${nome} · ${fh(tot)} h de motor ligado · ocioso ${pc(to/tot,1)} · acima de 2.000 RPM ${pc(tx/tot,1)}`;
+ document.getElementById('dlg-h').innerHTML='<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th><th>Ocioso (h)</th><th>% ocioso</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th></tr>';
+ document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0&&m.length>1?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td><td>${fh(x.o||0)}</td><td style="color:${co((x.o||0)/(x.h||1))};font-weight:700">${pc((x.o||0)/(x.h||1),1)}</td><td>${fh(x.x||0)}</td><td style="color:#d64550;font-weight:700">${pc((x.x||0)/(x.h||1),1)}</td></tr>`).join('')
+  +(m.length>1?`<tr><td><b>Total</b></td><td></td><td><b>${fh(tot)}</b></td><td></td><td><b>${fh(to)}</b></td><td style="color:${co(to/tot)};font-weight:700">${pc(to/tot,1)}</td><td><b>${fh(tx)}</b></td><td style="color:#d64550;font-weight:700">${pc(tx/tot,1)}</td></tr>`:'')
+  ||'<tr><td colspan="8">Sem registros desse operador no monit.</td></tr>';
+ document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit e, delas, o motor ocioso (meta 10%; vermelho acima, verde abaixo) e o tempo com o motor acima de 2.000 RPM. Com mais de uma colhedora, a primeira é a principal, que aparece ao lado do nome nos rankings.';
  document.getElementById('dlg').hidden=false;document.getElementById('dlg-x').focus();}
+let VOLTA=null,CTX=null;
+const opLink=(op,txt)=>`<a href="#" class="lk lk-op" data-op="${encodeURIComponent(op)}" title="Ver colhedoras, motor ocioso e RPM de ${op}">${txt}</a>`;
 function outros(){const L=[...(D.outros||[])].sort((a,b)=>b.v-a.v);const tot=L.reduce((a,x)=>a+x.v,0)||1;const all=D.motivo.reduce((a,x)=>a+x.v,0)||1;const mx=Math.max(...L.map(x=>x.v),.01);
  document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent='Motor ocioso — motivos dentro de "Outros"';
  document.getElementById('dlg-s').textContent=`${fh(tot)} h ociosas em ${L.length} motivos`;
@@ -334,17 +338,18 @@ function apont(r){const L=r.mot||[];const tot=L.reduce((a,x)=>a+x[1],0)||1;const
  document.getElementById('dlg-b').innerHTML=L.map(([m,v])=>`<tr><td>${m}</td><td>${fh(v)}</td><td>${pc(v/tot,1)}<span class="mb"><i style="width:${Math.max(2,v/mx*100)}%;background:${m==='Sem Apontamento'||m==='Aguardando Transbordo'?'#d64550':'#22378c'}"></i></span></td><td>${pc(r.lig?v/r.lig:0,1)}</td></tr>`).join('')
   +`<tr><td><b>Total</b></td><td><b>${fh(tot)}</b></td><td><b>100,0%</b></td><td><b>${pc(r.poc,1)}</b></td></tr>`;
  document.getElementById('dlg-n').textContent='Motor ocioso (parada com motor ligado, já descontados os 90 s de cada parada) desse operador nessa colhedora, pelo apontamento registrado no monit. A soma de "% do motor ligado" é o % ocioso do operador.';
- document.getElementById('dlg-v').hidden=false;document.getElementById('dlg-v').focus();}
-document.getElementById('dlg-b').addEventListener('click',e=>{const a=e.target.closest('.lk');if(!a||!ULT)return;e.preventDefault();apont(ULT.rows[+a.dataset.i])});
-document.getElementById('dlg-v').addEventListener('click',()=>{if(ULT)detalhe(ULT.eq,ULT.modo)});
+ VOLTA=null;document.getElementById('dlg-v').textContent='← Voltar aos operadores';document.getElementById('dlg-v').hidden=false;document.getElementById('dlg-v').focus();}
+document.getElementById('dlg-b').addEventListener('click',e=>{const o=e.target.closest('[data-op]');if(o){e.preventDefault();maquinas(decodeURIComponent(o.dataset.op),CTX);return}
+ const a=e.target.closest('.lk');if(!a||!ULT)return;e.preventDefault();apont(ULT.rows[+a.dataset.i])});
+document.getElementById('dlg-v').addEventListener('click',()=>{if(VOLTA){const f=VOLTA;VOLTA=null;f()}else if(ULT)detalhe(ULT.eq,ULT.modo)});
 function frenteRpm(fr){const L=(D.rpm_frente_op||{})[fr.l]||[];const ref=fr.b5;const n=RPMN.length;
  const rows=L.map(r=>({...r,x:r.b[n-1],px:r.lig?r.b[n-1]/r.lig:0}));const mx=Math.max(...rows.map(r=>r.px),.01);
  document.getElementById('dlg-v').hidden=true;
- document.getElementById('dlg-t').textContent=`${fr.l} — operadores por excesso de RPM`;
+ document.getElementById('dlg-t').textContent=`${fr.l} — operadores por excesso de RPM`;VOLTA=null;CTX=Object.assign(()=>frenteRpm(fr),{txt:'← Voltar à '+fr.l});
  document.getElementById('dlg-s').textContent=`${pc(ref,1)} do tempo da frente acima de 2.000 RPM · ${rows.length} operadores, do que mais passou para o que menos passou`;
  document.getElementById('dlg-h').innerHTML='<tr><th>Operador</th><th>Colhedora</th><th>Motor ligado (h)</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th><th>Faixas de RPM</th></tr>';
  const faixas=r=>`<span style="display:flex;width:150px;height:10px;border-radius:3px;overflow:hidden;margin-left:auto">${r.b.map((v,k)=>`<i title="${RPMN[k]}: ${pc(r.lig?v/r.lig:0,1)}" style="display:block;width:${(r.lig?v/r.lig:0)*100}%;background:${RPMC[k]}"></i>`).join('')}</span>`;
- document.getElementById('dlg-b').innerHTML=rows.map(r=>`<tr><td title="${r.op}">${nomeCurto(r.op)}</td><td>${r.maq.join(', ')}</td><td>${fh(r.lig)}</td><td>${fh(r.x)}</td><td class="${r.px>ref?'kr':''}">${pc(r.px,1)}<span class="mb"><i style="width:${Math.max(2,r.px/mx*100)}%;background:#d64550"></i></span></td><td>${faixas(r)}</td></tr>`).join('')||'<tr><td colspan="6">Sem operadores registrados no monit.</td></tr>';
+ document.getElementById('dlg-b').innerHTML=rows.map(r=>`<tr><td title="${r.op}">${opLink(r.op,nomeCurto(r.op))}</td><td>${r.maq.join(', ')}</td><td>${fh(r.lig)}</td><td>${fh(r.x)}</td><td class="${r.px>ref?'kr':''}">${pc(r.px,1)}<span class="mb"><i style="width:${Math.max(2,r.px/mx*100)}%;background:#d64550"></i></span></td><td>${faixas(r)}</td></tr>`).join('')||'<tr><td colspan="6">Sem operadores registrados no monit.</td></tr>';
  document.getElementById('dlg-n').innerHTML=`Operador registrado no monit nessa frente (pelo menos 1 h de motor ligado). Em vermelho: acima da média da frente (${pc(ref,1)}). Faixas: `+RPMN.map((x,k)=>`<span style="white-space:nowrap"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${RPMC[k]};margin:0 3px 0 8px;vertical-align:-1px"></i>${x}</span>`).join('');
  document.getElementById('dlg').hidden=false;document.getElementById('dlg-x').focus();}
 function fecha(){document.getElementById('dlg').hidden=true}
@@ -355,7 +360,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')fecha()});
 meta_bars('c-ocfx',D.oc_frota,{w:600,lw:52,vw:52,rh:20,click:eq=>detalhe(eq,'oc')});
 hbars('c-octop',D.oc_top,{w:230,vw:50,fmt:fh,lw:52,click:eq=>detalhe(eq,'oc')});
 const to=document.getElementById('t-oc');D.longas.forEach(r=>{const tr=to.insertRow();[r.frota,f0(r.p10),f0(r.p30),fh(r.h10)].forEach(t=>{tr.insertCell().textContent=t})});
-meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${fh(r.oc)} h ociosas de ${fh(r.lig)} h ligado · máquinas: ${maqTip(r)}`,onclick:(r.maq||[]).length>1?()=>maquinas(r,'oc'):null})),{w:600,lw:240,vw:52,rh:24,fs:12});
+meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${fh(r.oc)} h ociosas de ${fh(r.lig)} h ligado · máquinas: ${maqTip(r)}`,onclick:()=>maquinas(r.l),dica:'clique para ver as colhedoras, o motor ocioso e o RPM'})),{w:600,lw:240,vw:52,rh:24,fs:12});
 linha('c-ocdia',D.oc_dia,D.meta_oc,{w:380,h:120,fmt:v=>NF(0)(v*100)+'%',lo:0,hi:1.25,area:true});
 
 /* L/t e litros */
@@ -389,11 +394,11 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:(r,i)
  (()=>{const FO2=D.rpm_frente_op||{};const box2=document.getElementById('fr-ops');const n=RPMN.length;
   if(!Object.keys(FO2).length){box2.closest('.cb').querySelectorAll('#fr-ops, #fr-ops + .note').forEach(e=>e.hidden=true);box2.previousElementSibling.hidden=true;return}
   box2.innerHTML='<table class="frops">'+D.rpm_frente.map((r,i)=>{const top=(FO2[r.l]||[]).map(o=>({o,p:o.lig?o.b[n-1]/o.lig:0})).filter(z=>z.p>0&&z.o.op!=='Sem Operador').slice(0,3);
-   return `<tr><td><a href="#" class="lk" data-fr="${i}">${r.l}</a></td><td>${top.length?top.map(z=>`<span class="op" title="${z.o.op} · ${z.o.maq.join(', ')} · ${fh(z.o.b[n-1])} h acima de 2.000">${nomeCurto(z.o.op)} <b>${NF(0)(z.p*100)}%</b></span>`).join(' · '):'Ninguém acima de 2.000 RPM'}</td></tr>`}).join('')+'</table>';
-  box2.addEventListener('click',e=>{const a=e.target.closest('[data-fr]');if(!a)return;e.preventDefault();frenteRpm(D.rpm_frente[+a.dataset.fr])});})();
+   return `<tr><td><a href="#" class="lk" data-fr="${i}">${r.l}</a></td><td>${top.length?top.map(z=>`<span class="op" title="${z.o.op} · ${z.o.maq.join(', ')} · ${fh(z.o.b[n-1])} h acima de 2.000">${opLink(z.o.op,nomeCurto(z.o.op))} <b>${NF(0)(z.p*100)}%</b></span>`).join(' · '):'Ninguém acima de 2.000 RPM'}</td></tr>`}).join('')+'</table>';
+  box2.addEventListener('click',e=>{const o=e.target.closest('[data-op]');if(o){e.preventDefault();maquinas(decodeURIComponent(o.dataset.op));return}const a=e.target.closest('[data-fr]');if(!a)return;e.preventDefault();frenteRpm(D.rpm_frente[+a.dataset.fr])});})();
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
- hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:(r.maq||[]).length>1?()=>maquinas(r,'rpm'):null})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
+ hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:()=>maquinas(r.l),dica:'clique para ver as colhedoras, o motor ocioso e o RPM'})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
  hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550',click:eq=>detalhe(eq,'rpm')});
 })();
 /* frotas sem Solinftec */

@@ -257,6 +257,7 @@ def calcular(rows, fim_dt):
         outros=[dict(l=nome_motivo(l), v=v / 3600) for l, v in mt[7:] if v > 0],
         oc_turno=[dict(l=t, v=tur[t] / 3600) for t in "ABC"],
         oc_op=ops[:10],
+        op_maq={o: maquinas(o) for o in op_l if op_l[o] >= 900},  # clique em qualquer operador
         longas=lg[:8],
         tot=dict(lig=sum(x["lig"] for x in F.values()) / 3600, oc=sum(x["oc"] for x in F.values()) / 3600,
                  oc_bruto=tot["oc_bruto"] / 3600, paradas=tot["paradas"], paradas_90=tot["paradas_90"]))
@@ -334,7 +335,7 @@ def main():
                horas=TH, lh=TL / TH if TH else 0, meta_lh=META_LH, horas_oc=t["oc"], horas_oc_bruto=t["oc_bruto"],
                paradas=t["paradas"], paradas_90=t["paradas_90"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0),
         tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit, ant=ant,
-        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "outros", "rpm_frente_op", "oc_turno", "oc_op", "longas"]},
+        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "outros", "rpm_frente_op", "oc_turno", "oc_op", "longas", "op_maq"]},
         notas=[
             f"Litros, horas, toneladas, L/h e L/t: semana de {ini[:5]} a {fim} do Indicador de Consumo de Combustível — Colhedoras"
             + (f", atualizado em {atualizado}" if atualizado else "") + f". Frentes {nf}.",
