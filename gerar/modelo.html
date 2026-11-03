@@ -309,14 +309,14 @@ function detalhe(eq,modo){const L=(D.det||{})[eq]||[];const dlg=document.getElem
    <td>${fh(r.oc)}</td><td class="${r.poc>D.meta_oc?'kr':'kgn'}">${(r.mot||[]).length?`<a class="lk" href="#" data-i="${i}" title="Ver os apontamentos do motor ocioso">${pc(r.poc,1)}</a>`:pc(r.poc,1)}${barra(r.poc,mOc,r.poc>D.meta_oc?'#d64550':'#2e7d32')}</td>
    <td>${fh(r.x)}</td><td class="${r.px>0?'kr':''}">${pc(r.px,1)}${barra(r.px,mX,'#d64550')}</td></tr>`).join(''):'<tr><td colspan="6">Sem operadores registrados no monit.</td></tr>';
  dlg.hidden=false;document.getElementById('dlg-x').focus();}
-function maquinas(r){const m=[...(r.maq||[])].sort((a,b)=>b.h-a.h);const tot=m.reduce((a,x)=>a+x.h,0)||1;const mx=Math.max(...m.map(x=>x.h),.01);
+function maquinas(r,modo){const oc=modo==='oc',val=x=>(oc?x.o:x.x)||0,cor=oc?(v=>v>D.meta_oc?'#d64550':'#2e7d32'):(()=>'#d64550');const m=[...(r.maq||[])].sort((a,b)=>b.h-a.h);const tot=m.reduce((a,x)=>a+x.h,0)||1;const mx=Math.max(...m.map(x=>x.h),.01);
  document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent=`${nomeCurto(r.l)} — colhedoras operadas`;
  document.getElementById('dlg-s').textContent=r.l;
- document.getElementById('dlg-h').innerHTML='<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th><th>Acima 2.000 (h)</th><th>% acima 2.000</th></tr>';
- const tx=m.reduce((a,x)=>a+(x.x||0),0);
- document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td><td>${fh(x.x||0)}</td><td style="color:#d64550;font-weight:700">${pc((x.x||0)/(x.h||1),1)}</td></tr>`).join('')
-  +`<tr><td><b>Total</b></td><td></td><td><b>${fh(tot)}</b></td><td></td><td><b>${fh(tx)}</b></td><td style="color:#d64550;font-weight:700">${pc(tx/tot,1)}</td></tr>`;
- document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit e, delas, o tempo com o motor acima de 2.000 RPM. A primeira é a que aparece ao lado do nome; as demais formam o +N.';
+ document.getElementById('dlg-h').innerHTML=`<tr><th>Colhedora</th><th>Frente</th><th>Motor ligado (h)</th><th>% do tempo do operador</th>${oc?'<th>Ocioso (h)</th><th>% ocioso</th>':'<th>Acima 2.000 (h)</th><th>% acima 2.000</th>'}</tr>`;
+ const tx=m.reduce((a,x)=>a+val(x),0);
+ document.getElementById('dlg-b').innerHTML=m.map((x,i)=>`<tr><td>${x.eq}${i===0?' <small style="color:#5b6475">(principal)</small>':''}</td><td>${x.fr}</td><td>${fh(x.h)}</td><td>${pc(x.h/tot,1)}<span class="mb"><i style="width:${Math.max(2,x.h/mx*100)}%;background:#22378c"></i></span></td><td>${fh(val(x))}</td><td style="color:${cor(val(x)/(x.h||1))};font-weight:700">${pc(val(x)/(x.h||1),1)}</td></tr>`).join('')
+  +`<tr><td><b>Total</b></td><td></td><td><b>${fh(tot)}</b></td><td></td><td><b>${fh(tx)}</b></td><td style="color:${cor(tx/tot)};font-weight:700">${pc(tx/tot,1)}</td></tr>`;
+ document.getElementById('dlg-n').textContent='Horas de motor ligado do operador em cada colhedora no monit e, delas, '+(oc?'o motor ocioso (meta 10%)':'o tempo com o motor acima de 2.000 RPM')+'. A primeira é a que aparece ao lado do nome; as demais formam o +N.';
  document.getElementById('dlg').hidden=false;document.getElementById('dlg-x').focus();}
 function outros(){const L=[...(D.outros||[])].sort((a,b)=>b.v-a.v);const tot=L.reduce((a,x)=>a+x.v,0)||1;const all=D.motivo.reduce((a,x)=>a+x.v,0)||1;const mx=Math.max(...L.map(x=>x.v),.01);
  document.getElementById('dlg-v').hidden=true;document.getElementById('dlg-t').textContent='Motor ocioso — motivos dentro de "Outros"';
@@ -355,7 +355,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')fecha()});
 meta_bars('c-ocfx',D.oc_frota,{w:600,lw:52,vw:52,rh:20,click:eq=>detalhe(eq,'oc')});
 hbars('c-octop',D.oc_top,{w:230,vw:50,fmt:fh,lw:52,click:eq=>detalhe(eq,'oc')});
 const to=document.getElementById('t-oc');D.longas.forEach(r=>{const tr=to.insertRow();[r.frota,f0(r.p10),f0(r.p30),fh(r.h10)].forEach(t=>{tr.insertCell().textContent=t})});
-meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${fh(r.oc)} h ociosas de ${fh(r.lig)} h ligado · máquinas: ${maqTip(r)}`,onclick:(r.maq||[]).length>1?()=>maquinas(r):null})),{w:600,lw:240,vw:52,rh:24,fs:12});
+meta_bars('c-op',D.oc_op.map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,t:`${r.l}: ${fh(r.oc)} h ociosas de ${fh(r.lig)} h ligado · máquinas: ${maqTip(r)}`,onclick:(r.maq||[]).length>1?()=>maquinas(r,'oc'):null})),{w:600,lw:240,vw:52,rh:24,fs:12});
 linha('c-ocdia',D.oc_dia,D.meta_oc,{w:380,h:120,fmt:v=>NF(0)(v*100)+'%',lo:0,hi:1.25,area:true});
 
 /* L/t e litros */
@@ -393,7 +393,7 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:(r,i)
   box2.addEventListener('click',e=>{const a=e.target.closest('[data-fr]');if(!a)return;e.preventDefault();frenteRpm(D.rpm_frente[+a.dataset.fr])});})();
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
- hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:(r.maq||[]).length>1?()=>maquinas(r):null})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
+ hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:(r.maq||[]).length>1?()=>maquinas(r,'rpm'):null})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
  hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550',click:eq=>detalhe(eq,'rpm')});
 })();
 /* frotas sem Solinftec */
