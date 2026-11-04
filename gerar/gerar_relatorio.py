@@ -19,6 +19,7 @@ import csv
 import json
 import os
 import re
+import shutil
 import subprocess
 from datetime import datetime, timedelta
 
@@ -294,6 +295,23 @@ def anterior(a, frentes, k):
     return ant
 
 
+def pagina_semana(ini, fim):
+    """Nome do arquivo da semana: semana-AAAA-MM-DD_AAAA-MM-DD.html."""
+    iso = lambda d: datetime.strptime(d, "%d/%m/%Y").strftime("%Y-%m-%d")
+    return f"semana-{iso(ini)}_{iso(fim)}.html"
+
+
+def atualizar_semanas(pasta):
+    """Refaz semanas.js (lista de semanas para o seletor do topo) a partir das páginas semana-*.html; devolve a mais recente."""
+    arqs = sorted(f for f in os.listdir(pasta) if re.fullmatch(r"semana-\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.html", f))
+    br_ = lambda iso: f"{iso[8:10]}/{iso[5:7]}/{iso[:4]}"
+    L = [dict(arq=f, ini=f[7:17], fim=f[18:28], rotulo=f"{br_(f[7:17])} a {br_(f[18:28])}") for f in arqs]
+    with open(os.path.join(pasta, "semanas.js"), "w", encoding="utf-8") as fh:
+        fh.write("// Gerado por gerar/gerar_relatorio.py: semanas disponíveis no seletor do topo (mais recente primeiro).\n")
+        fh.write("window.SEMANAS = " + json.dumps(L[::-1], ensure_ascii=False, indent=1) + ";\n")
+    return arqs[-1]
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pdf", required=True)
@@ -301,7 +319,8 @@ def main():
     ap.add_argument("--frentes", default="1,2,3,5,6")
     ap.add_argument("--monit-anterior", nargs="+", help="monit da semana anterior, para comparar ocioso e RPM")
     ap.add_argument("--coluna", type=int, help="coluna de período do PDF (1 = primeira); padrão: a última")
-    ap.add_argument("--saida", default=os.path.join(AQUI, "..", "index.html"))
+    ap.add_argument("--saida", default=os.path.join(AQUI, "..", "index.html"),
+                    help="página inicial; cada semana também vira semana-AAAA-MM-DD_AAAA-MM-DD.html na mesma pasta")
     a = ap.parse_args()
     frentes = [int(x) for x in a.frentes.split(",")]
 
@@ -330,7 +349,7 @@ def main():
     t = M["tot"]
     nf = ", ".join(map(str, frentes[:-1])) + (" e " if len(frentes) > 1 else "") + str(frentes[-1])
     D = dict(
-        periodo=f"{ini} - {fim}",
+        periodo=f"{ini} - {fim}", semana=pagina_semana(ini, fim),
         K=dict(litros=TL, frotas=sum(len(g["linhas"]) for g in tab), ton=TT, lt=TL / TT if TT else 0, meta=META_LT,
                horas=TH, lh=TL / TH if TH else 0, meta_lh=META_LH, horas_oc=t["oc"], horas_oc_bruto=t["oc_bruto"],
                paradas=t["paradas"], paradas_90=t["paradas_90"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0),
@@ -348,7 +367,11 @@ def main():
         ])
     html = open(os.path.join(AQUI, "modelo.html"), encoding="utf-8").read()
     html = html.replace("__DADOS__", json.dumps(D, ensure_ascii=False)).replace("__FRENTES__", f"Frentes {nf}")
-    open(a.saida, "w", encoding="utf-8").write(html)
+    pasta = os.path.dirname(os.path.abspath(a.saida))
+    open(os.path.join(pasta, D["semana"]), "w", encoding="utf-8").write(html)
+    inicial = atualizar_semanas(pasta)
+    shutil.copyfile(os.path.join(pasta, inicial), a.saida)  # a página inicial é sempre a semana mais recente
+    print(f"Semana salva em {D['semana']}; página inicial = {inicial}")
     print(f"Relatório gerado: {ini} a {fim} · frentes {nf} · {D['K']['frotas']} colhedoras · "
           f"{br(TL, 0)} L · {br(TT, 0)} t · {br(D['K']['lh'], 2)} L/h · ocioso {br(t['oc'], 1)} h ({br(D['K']['pct_oc'] * 100, 1)}%)")
     if sem:

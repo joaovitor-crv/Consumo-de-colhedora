@@ -10,6 +10,7 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
 - PDF "INDICADOR CONSUMO DE COMBUSTÍVEL — COLHEDORAS". Quando o PDF traz várias semanas lado a lado (SEMANA, SEMANA 2, SAFRA...), o gerador usa a última coluna, a semana mais recente; `--coluna N` escolhe outra (1 = primeira) (03/11/2026). Essa coluna define o período e traz horas, diesel, L/h, toneladas e L/t por frota e por frente.
 - CSVs do monit (separados por `;`) da mesma semana.
 - Comparação com a semana anterior (03/11/2026): usa a coluna do PDF antes da usada. Aparece nos cartões do topo ("ant." + variação), na coluna "vs" da tabela (diferença de L/h; verde caiu, vermelho subiu) e nos gráficos de L/h e L/t por frente (barra cinza = semana anterior). `--monit-anterior <CSV>` acrescenta motor ocioso e tempo acima de 2.000 RPM (geral e por frente). O monit da semana anterior pode ser tirado da base histórica (`base-colhedoras/dados/monit.csv.gz`, separado por vírgula: converter para `;`).
+- Semanas (04/11/2026): cada execução salva a semana em `semana-AAAA-MM-DD_AAAA-MM-DD.html`, refaz `semanas.js` (lista do seletor "Semana" no topo) e copia a semana mais recente para `index.html`. Para incluir uma semana antiga, rode o gerador com `--coluna N` (e o monit dela); a página inicial continua na mais recente. Faça commit das páginas `semana-*.html` e do `semanas.js` junto com o `index.html`.
 - Frentes padrão: 1, 2, 3, 5 e 6 (frentes 5 e 6 incluídas a pedido do usuário em 28/10/2026).
 
 ## Padrão aprovado pelo usuário (28/10/2026)

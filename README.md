@@ -4,7 +4,7 @@ Painel de acompanhamento do consumo de diesel das colhedoras com telemetria: lit
 
 **Período atual:** 26/10/2026 a 01/11/2026 (frentes 1, 2, 3, 5 e 6)
 
-Abra o `index.html` ou acesse pelo GitHub Pages. Para baixar, use o botão **Baixar PDF** no topo e escolha "Salvar como PDF" (o painel inteiro sai numa folha A3).
+Abra o `index.html` ou acesse pelo GitHub Pages. No topo, a lista **Semana** troca para qualquer semana já gerada (cada uma fica em `semana-AAAA-MM-DD_AAAA-MM-DD.html`; a página inicial é sempre a mais recente). Para baixar, use o botão **Baixar PDF** no topo e escolha "Salvar como PDF" (o painel inteiro sai numa folha A3).
 
 ## Bases usadas
 - **Indicador de Consumo de Combustível — Colhedoras (PDF)**: a coluna da semana do relatório (a última, quando o PDF traz várias semanas lado a lado), com horas, diesel, L/h, toneladas e L/t por frota e por frente.
