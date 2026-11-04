@@ -240,10 +240,6 @@ def calcular(rows, fim_dt):
                  fr=", ".join(sorted(op_f[o])) if len(op_f[o]) <= 3 else f"{len(op_f[o])} colhedoras")
             for o, v in op_rpm.items() if sum(v.values()) >= MIN_H]
     otop.sort(key=lambda x: -x["v"])
-    # os 5 operadores com mais horas de motor ligado, com o tempo acima de 2.000 RPM
-    htop = sorted((o for o in op_rpm if o != "Sem Operador"), key=lambda o: -sum(op_rpm[o].values()))[:5]
-    htop = [dict(l=o, lig=sum(op_rpm[o].values()) / 3600, h=op_rpm[o][EXC] / 3600, v=op_rpm[o][EXC] / sum(op_rpm[o].values()), maq=maquinas(o))
-            for o in htop]
     lg = sorted((v for v in longas.values() if v["p10"]), key=lambda x: (-x["p10"], -x["h10"]))
     return dict(
         F=F,
@@ -256,7 +252,6 @@ def calcular(rows, fim_dt):
         rpm_frente_op=rpm_frente_op(fo_b, fo_e),
         rpm_top=rtop[:10],
         rpm_op=otop[:10],
-        op_horas=htop,
         det=detalhe(ep_l, ep_o, ep_x, ep_m),
         motivo=[dict(l=l, v=v / 3600) for l, v in mt[:7]] + ([dict(l="Outros", v=outros / 3600)] if outros else []),
         outros=[dict(l=nome_motivo(l), v=v / 3600) for l, v in mt[7:] if v > 0],
@@ -340,7 +335,7 @@ def main():
                horas=TH, lh=TL / TH if TH else 0, meta_lh=META_LH, horas_oc=t["oc"], horas_oc_bruto=t["oc_bruto"],
                paradas=t["paradas"], paradas_90=t["paradas_90"], pct_oc=t["oc"] / t["lig"] if t["lig"] else 0),
         tabela=tab, frentes=fr, meta_oc=META_OC, sem_monit=sem_monit, ant=ant,
-        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "outros", "rpm_frente_op", "oc_turno", "oc_op", "longas", "op_maq", "op_horas"]},
+        **{k: M[k] for k in ["oc_frota", "oc_top", "oc_dia", "rpm", "rpm_frente", "rpm_top", "rpm_op", "det", "motivo", "outros", "rpm_frente_op", "oc_turno", "oc_op", "longas", "op_maq"]},
         notas=[
             f"Litros, horas, toneladas, L/h e L/t: semana de {ini[:5]} a {fim} do Indicador de Consumo de Combustível — Colhedoras"
             + (f", atualizado em {atualizado}" if atualizado else "") + f". Frentes {nf}.",

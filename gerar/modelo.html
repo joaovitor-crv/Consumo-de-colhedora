@@ -149,10 +149,6 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
         <div class="cb"><div class="chart" id="c-rpmop"></div>
           <p class="note">% do tempo de motor ligado acima de 2.000 RPM, pelo operador registrado no monit. Entram operadores com pelo menos 5 h de motor ligado na semana. <b>Clique no operador para ver as colhedoras, o motor ocioso e o RPM.</b></p></div>
       </section>
-      <section class="card"><h3>Top 5 operadores em horas trabalhadas x % acima de 2.000 RPM</h3>
-        <div class="cb"><div class="leg"><span><i style="background:#22378c"></i>Horas de motor ligado</span><span><i style="background:#d64550"></i>Delas, acima de 2.000 RPM</span></div><div class="chart" id="c-ophoras"></div>
-          <p class="note">Os 5 operadores com mais horas de motor ligado na semana (monit). Barra inteira = horas trabalhadas; parte vermelha = horas acima de 2.000 RPM; à direita, o % do tempo acima de 2.000. <b>Clique no operador para ver as colhedoras.</b></p></div>
-      </section>
       <section class="card" id="card-sem" hidden><h3>Com abastecimento, sem dados no Solinftec <span id="sem-n"></span></h3>
         <div class="cb"><div class="to-wrap"><table class="to"><thead><tr><th>Frota</th><th>Frente</th><th>Litros</th><th>Horas</th><th>L/h</th></tr></thead><tbody id="t-sem"></tbody></table></div>
           <p class="note">Aparecem no relatório de abastecimento, mas sem telemetria (Solinftec/monit) na semana: ficam fora de motor ocioso, RPM e operadores.</p></div>
@@ -250,18 +246,6 @@ function vpar(id,rows,opt){const box=document.getElementById(id);const W=600,H=1
    el('text',{x,y:y-6,'text-anchor':'middle','font-size':k==='ant'?11:12.5,'font-weight':k==='ant'?400:700,fill:k==='ant'?'#5b6475':'#1d2433'},s,f2(v))});
   if(r.a!=null&&r.v!=null){const d=r.v-r.a;el('text',{x:cx,y:H-bot+28,'text-anchor':'middle','font-size':10.5,'font-weight':700,fill:Math.abs(d)<.005?'#5b6475':d<0?'#2e7d32':'#d64550'},s,(d<0?'▼ ':d>0?'▲ +':'')+f2(Math.abs(d)))}
   el('text',{x:cx,y:H-bot+14,'text-anchor':'middle','font-size':12},s,r.l)})}
-/* top 5 operadores por horas: barra das horas com a parte acima de 2.000 RPM em vermelho */
-function horasRpm(id,rows){const box=document.getElementById(id);if(!rows.length){box.closest('.card').hidden=true;return}
- const W=400,lw=150,vw=52,rh=40,H=rows.length*rh+4;const s=svg(box,W,H);const max=Math.max(...rows.map(r=>r.lig),.01);const bw=W-lw-vw-44;
- rows.forEach((r,i)=>{const y=i*rh+4,w=Math.max(2,bw*r.lig/max),wx=w*r.v;
-  const nm=el('text',{x:lw-8,y:y+13,'text-anchor':'end','font-size':11.5,style:'fill:#2a44a8;text-decoration:underline'},s,nomeCurto(r.l));
-  el('text',{x:lw-8,y:y+27,'text-anchor':'end','font-size':10,fill:'#5b6475'},s,maqTxt(r).replace(/^ · /,''));
-  const b1=el('rect',{x:lw,y:y+4,width:w,height:18,rx:3,fill:'#22378c'},s);const b2=el('rect',{x:lw,y:y+4,width:Math.max(wx>0?2:0,wx),height:18,rx:3,fill:'#d64550'},s);
-  const tt=`${r.l}: ${fh(r.lig)} h de motor ligado · ${fh(r.h)} h acima de 2.000 RPM (${pc(r.v,1)})`;hover(b1,box,tt);hover(b2,box,tt);
-  el('text',{x:lw+w+5,y:y+17,'font-size':11,'font-weight':700,fill:'#1d2433'},s,fh(r.lig));
-  el('text',{x:lw+5,y:y+34,'font-size':10,fill:'#d64550'},s,`${fh(r.h)} h acima de 2.000`);
-  el('text',{x:W-2,y:y+17,'text-anchor':'end','font-size':13,'font-weight':700,fill:'#d64550'},s,pc(r.v,1));
-  clicavel(s,box,0,y,lw,rh-4,r,()=>maquinas(r.l),tt,'clique para ver as colhedoras, o motor ocioso e o RPM')});}
 /* barras horizontais com valor à direita */
 function hbars(id,rows,opt){const box=document.getElementById(id);const W=opt.w||300,rh=opt.rh||23,lw=opt.lw||56,H=rows.length*rh+6;
  const s=svg(box,W,H);const max=Math.max(...rows.map(r=>r.v),1e-9);const bwMax=W-lw-opt.vw;
@@ -415,7 +399,6 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:(r,i)
   box2.addEventListener('click',e=>{const o=e.target.closest('[data-op]');if(o){e.preventDefault();maquinas(decodeURIComponent(o.dataset.op));return}const a=e.target.closest('[data-fr]');if(!a)return;e.preventDefault();frenteRpm(D.rpm_frente[+a.dataset.fr])});})();
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
- horasRpm('c-ophoras',D.op_horas||[]);
  hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:()=>maquinas(r.l),dica:'clique para ver as colhedoras, o motor ocioso e o RPM'})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
  hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550',click:eq=>detalhe(eq,'rpm')});
 })();
