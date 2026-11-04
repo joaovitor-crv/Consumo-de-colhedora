@@ -23,6 +23,7 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
   - Faixa de RPM por frente: cada frente é clicável e abre os operadores daquela frente (pelo menos 1 h de motor ligado), do que mais passou de 2.000 RPM para o que menos passou, com colhedora, horas, % acima de 2.000 (vermelho acima da média da frente) e a barra das faixas de RPM (30/10/2026). Abaixo do gráfico, quadro "Operadores acima de 2.000 RPM por frente" com os 3 operadores de cada frente com maior % acima de 2.000 (sem contar "Sem Operador").
   - Motor ocioso por motivo: 7 maiores motivos + "Outros". "Outros" é clicável e abre cada motivo com horas, % de Outros e % do total ocioso (30/10/2026).
   - Quadro "Com abastecimento, sem dados no Solinftec" (frotas do PDF sem monit), no fim da coluna direita.
+  - Botão "Baixar PDF" no topo, ao lado do período (04/11/2026): abre a impressão do navegador ("Salvar como PDF"). A impressão (`@media print` no início do `modelo.html`) põe o painel inteiro numa folha A3 em pé, com o layout de 3 colunas e as cores da tela; o nome sugerido do arquivo é "Consumo colhedoras <período>".
 - **Cores de RPM**:
   - Verde: marcha lenta (até 900).
   - Azul claro: 901–1.500.

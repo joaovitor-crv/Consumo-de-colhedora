@@ -1,4 +1,19 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}/* impressão / Baixar PDF: o painel inteiro numa folha A3 em pé, com o layout de 3 colunas da tela e as cores mantidas */
+@page{size:A3 portrait;margin:6mm}
+@media print{
+ html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:var(--bg,#eef0f4)!important}
+ body{width:1600px!important;zoom:.665}
+ .btn-pdf,.dlg{display:none!important}
+ .top{grid-template-columns:auto 1fr!important}
+ .kpis{grid-template-columns:repeat(7,minmax(0,1fr))!important}
+ .grid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr) minmax(0,.82fr)!important}
+ .grid .col:last-child{display:flex!important;grid-column:auto!important}
+ .split{grid-template-columns:minmax(0,.55fr) minmax(0,1fr)!important}
+ .tw{max-height:none!important;overflow:visible!important}
+ .tv th{position:static!important}
+ .card{box-shadow:none!important}
+}
+</style></head><body>
 <title>Consumo Combustível Colhedoras CRV</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
@@ -20,6 +35,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font)}
 .hdr{display:flex;flex-direction:column;gap:6px;min-width:0}
 .hdr-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .hdr h1{margin:0;color:var(--navy);font-size:13px;font-weight:700;letter-spacing:.01em;text-transform:uppercase}
+.hdr-acoes{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn-pdf{background:var(--navy);color:#fff;border:0;border-radius:4px;font:700 12px var(--font);padding:4px 12px;cursor:pointer}
+.btn-pdf:hover{background:#2a44a8}.btn-pdf:focus-visible{outline:2px solid #2a44a8;outline-offset:2px}
 .periodo{background:#111;color:#fff;font-weight:700;font-style:italic;font-size:12px;padding:3px 16px;border-radius:4px;white-space:nowrap}
 .kpis{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
 .kpi{background:var(--card);border-radius:8px;display:flex;align-items:center;gap:8px;padding:6px 8px;min-width:0;box-shadow:0 1px 2px rgba(20,30,60,.06)}
@@ -88,7 +106,7 @@ table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
   <div class="top">
     <div class="logo"><img class="logo-img" src="logo-crv.png" alt="CRV Industrial — Açúcar, Etanol e Energia"></div>
     <div class="hdr">
-      <div class="hdr-row"><h1>Acompanhamento consumo de combustível - colhedoras</h1><span class="periodo" id="periodo"></span></div>
+      <div class="hdr-row"><h1>Acompanhamento consumo de combustível - colhedoras</h1><span class="hdr-acoes"><button type="button" id="btn-pdf" class="btn-pdf" title="Abre a impressão: escolha Salvar como PDF">Baixar PDF</button><span class="periodo" id="periodo"></span></span></div>
       <div class="kpis" id="kpis"></div>
     </div>
   </div>
@@ -213,6 +231,10 @@ const antK=AK?{bomba:[f0(AK.litros),var_(AK.litros,K.litros)],estrada:[f0(AK.ton
  raio:A.pct_oc!=null?[pc(A.pct_oc,1),var_(A.pct_oc,K.pct_oc,true)]:null}:{};
 document.getElementById('kpis').innerHTML=kpis.map(([i,v,l,c])=>`<div class="kpi"><svg viewBox="0 0 30 30" aria-hidden="true">${IC[i]}</svg><div><span class="v ${c}">${v}</span><span class="l">${l}</span>${antK[i]?`<span class="a" title="Semana ${A.periodo}: ${antK[i][0]}">ant. ${antK[i][0]} ${antK[i][1]}</span>`:''}</div></div>`).join('');
 document.getElementById('periodo').textContent='PERÍODO '+D.periodo;
+/* Baixar PDF: usa a impressão do navegador; o nome sugerido do arquivo leva o período */
+(()=>{const t0=document.title,nome='Consumo colhedoras '+D.periodo.replace(/\/\d{4}/g,'').replace(/\//g,'-').replace(' - ',' a ');
+ addEventListener('beforeprint',()=>{document.title=nome});addEventListener('afterprint',()=>{document.title=t0});
+ document.getElementById('btn-pdf').addEventListener('click',()=>window.print());})();
 document.querySelectorAll('.meta-lh').forEach(e=>e.textContent=f2(K.meta_lh));
 
 /* tabela */
