@@ -11,6 +11,8 @@ python3 gerar/gerar_relatorio.py --pdf <INDICADOR.pdf> --monit <MONIT1.csv> [<MO
 - CSVs do monit (separados por `;`) da mesma semana.
 - Comparação com a semana anterior (03/11/2026): usa a coluna do PDF antes da usada. Aparece nos cartões do topo ("ant." + variação), na coluna "vs" da tabela (diferença de L/h; verde caiu, vermelho subiu) e nos gráficos de L/h e L/t por frente (barra cinza = semana anterior). `--monit-anterior <CSV>` acrescenta motor ocioso e tempo acima de 2.000 RPM (geral e por frente). O monit da semana anterior pode ser tirado da base histórica (`base-colhedoras/dados/monit.csv.gz`, separado por vírgula: converter para `;`).
 - Semanas (04/11/2026): cada execução salva a semana em `semana-AAAA-MM-DD_AAAA-MM-DD.html`, refaz `semanas.js` (lista do seletor "Semana" no topo) e copia a semana mais recente para `index.html`. Para incluir uma semana antiga, rode o gerador com `--coluna N` (e o monit dela); a página inicial continua na mais recente. Faça commit das páginas `semana-*.html` e do `semanas.js` junto com o `index.html`.
+- Horas corrigidas (10/11/2026): `--horas FROTA=H [FROTA=H ...]` troca as horas de frotas com horímetro errado no PDF e refaz o L/h da frota e o total da frente; a correção vai para as notas da página. Na semana 02–08/11/2026: 62513=60,3 e 62523=102,5.
+- PDF com colunas SEMANA / MÊS / SAFRA: a última é a safra, então use `--coluna 1` para pegar a semana (10/11/2026).
 - Frentes padrão: 1, 2, 3, 5 e 6 (frentes 5 e 6 incluídas a pedido do usuário em 28/10/2026).
 
 ## Padrão aprovado pelo usuário (28/10/2026)

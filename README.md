@@ -2,7 +2,7 @@
 
 Painel de acompanhamento do consumo de diesel das colhedoras com telemetria: litros por hora (L/h), litros por tonelada colhida (L/t), motor ocioso, faixa de RPM e motivos de parada.
 
-**Período atual:** 26/10/2026 a 01/11/2026 (frentes 1, 2, 3, 5 e 6)
+**Período atual:** 02/11/2026 a 08/11/2026 (frentes 1, 2, 3, 5 e 6)
 
 Abra o `index.html` ou acesse pelo GitHub Pages. No topo, a lista **Semana** troca para qualquer semana já gerada (cada uma fica em `semana-AAAA-MM-DD_AAAA-MM-DD.html`; a página inicial é sempre a mais recente). Para baixar, use o botão **Baixar PDF** no topo e escolha "Salvar como PDF" (o painel inteiro sai numa folha A3).
 
@@ -29,6 +29,7 @@ Abra o `index.html` ou acesse pelo GitHub Pages. No topo, a lista **Semana** tro
    python gerar/gerar_relatorio.py --pdf INDICADOR.pdf --monit MONIT1.csv MONIT2.csv --monit-anterior MONIT_SEMANA_ANTERIOR.csv --frentes 1,2,3,5,6
    ```
    Quando o PDF traz a semana anterior ao lado, o relatório compara com ela: nos cartões do topo (valor anterior e variação), na coluna "vs" da tabela (diferença de L/h por colhedora e por frente) e nos gráficos de L/h e L/t por frente (barra cinza = semana anterior). Com `--monit-anterior`, compara também o motor ocioso e o tempo acima de 2.000 RPM (geral e por frente). Sem semana anterior no PDF, a página sai como antes.
+   Se o horímetro de alguma frota veio errado no indicador, corrija as horas com `--horas FROTA=H` (ex.: `--horas 62513=60,3 62523=102,5`): o L/h da frota e o total da frente são refeitos e a correção aparece nas notas da página.
 3. O `index.html` é refeito com o layout padrão (`gerar/modelo.html`). Publique com commit e push.
 
 Precisa de Python 3 e `pdftotext` (poppler-utils). Para mudar o visual, edite `gerar/modelo.html` (os dados entram no lugar de `__DADOS__`).

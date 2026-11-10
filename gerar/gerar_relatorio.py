@@ -264,6 +264,27 @@ def calcular(rows, fim_dt):
                  oc_bruto=tot["oc_bruto"] / 3600, paradas=tot["paradas"], paradas_90=tot["paradas_90"]))
 
 
+def corrigir_horas(grupos, totais, correcoes):
+    """Troca as horas de frotas com horímetro errado no PDF (--horas FROTA=H) e refaz o L/h da frota e o total da frente."""
+    feitas = []
+    for c in correcoes or []:
+        frota, h = c.split("=")
+        frota, h = int(frota), float(h.replace(",", "."))
+        for f, L in grupos.items():
+            for x in L:
+                if x["frota"] != frota:
+                    continue
+                antes = x["horas"] or 0
+                x["horas"] = h
+                x["lh"] = x["litros"] / h if x["litros"] and h else None
+                T = totais.get(f)
+                if T:
+                    T["horas"] = (T["horas"] or 0) - antes + h
+                    T["lh"] = T["litros"] / T["horas"] if T["litros"] and T["horas"] else None
+                feitas.append(f"{frota} de {br(antes, 1)} h para {br(h, 1)} h")
+    return feitas
+
+
 def soma_frentes(grupos, totais, frentes):
     """Totais por frente e do conjunto das frentes escolhidas (mesma regra da semana atual)."""
     fr = []
@@ -318,6 +339,8 @@ def main():
     ap.add_argument("--monit", required=True, nargs="+")
     ap.add_argument("--frentes", default="1,2,3,5,6")
     ap.add_argument("--monit-anterior", nargs="+", help="monit da semana anterior, para comparar ocioso e RPM")
+    ap.add_argument("--horas", nargs="+", metavar="FROTA=H",
+                    help="corrige as horas de frotas com horímetro errado no PDF (ex.: 62513=60,3); L/h e total da frente são refeitos")
     ap.add_argument("--coluna", type=int, help="coluna de período do PDF (1 = primeira); padrão: a última")
     ap.add_argument("--saida", default=os.path.join(AQUI, "..", "index.html"),
                     help="página inicial; cada semana também vira semana-AAAA-MM-DD_AAAA-MM-DD.html na mesma pasta")
@@ -325,6 +348,7 @@ def main():
     frentes = [int(x) for x in a.frentes.split(",")]
 
     ini, fim, atualizado, grupos, totais = ler_pdf(a.pdf, frentes, a.coluna)
+    corrigidas = corrigir_horas(grupos, totais, a.horas)
     rows, fim_dt = ler_monit(a.monit, frentes, ini, fim)
     M = calcular(rows, fim_dt)
 
@@ -361,6 +385,7 @@ def main():
             f"Motor ocioso, paradas, RPM, motivos, turnos e operadores: monit de {ini[:5]} a {fim}."
             + (f" Sem telemetria nesse período: {', '.join(sem)} ({'aparece' if len(sem) == 1 else 'aparecem'} na tabela só com os dados de consumo)." if sem else ""),
             *([totais["_aviso"]] if totais.get("_aviso") else []),
+            *([f"Horas corrigidas manualmente (horímetro errado no indicador): {'; '.join(corrigidas)}. L/h da frota e da frente refeitos com essas horas."] if corrigidas else []),
             f"Motor ocioso descontando 90 s de cada parada: {br(t['paradas'], 0)} paradas com motor ligado; "
             f"{br(t['paradas'] - t['paradas_90'], 0)} duraram até 90 s e não contam. Sem o desconto seriam {hm(t['oc_bruto'])} h; "
             f"com o desconto, {hm(t['oc'])} h.",
