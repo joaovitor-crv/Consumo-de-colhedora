@@ -7,7 +7,8 @@ Uso:
   "Indicador Consumo de Combustível — Colhedoras". Quando o PDF traz várias semanas lado a lado,
   usa a última (a mais recente); --coluna N escolhe outra (1 = primeira). O período do relatório é o dessa coluna.
 - Motor ocioso, paradas, RPM, motivos, turnos e operadores: exportação do monit (CSV com ';').
-- Comparação com a semana anterior: a coluna do PDF antes da usada (L/h, L/t, litros, horas, t);
+- Comparação com a semana anterior: a coluna do PDF antes da usada (L/h, L/t, litros, horas, t); sem essa coluna,
+  a página semana-*.html já gerada da semana anterior (consumo, ocioso e RPM);
   com --monit-anterior, também motor ocioso e tempo acima de 2.000 RPM.
 - Requer pdftotext (poppler-utils).
 
@@ -299,10 +300,34 @@ def soma_frentes(grupos, totais, frentes):
     return fr, dict(litros=L, horas=H, ton=T, lh=L / H if H else None, lt=L / T if T else None)
 
 
-def anterior(a, frentes, k):
-    """Semana anterior: a coluna do PDF antes da usada e, se houver, o monit dela."""
-    if not k:
+def anterior_da_pagina(pasta, ini):
+    """Semana anterior tirada da página semana-*.html já gerada que termina na véspera de ini (quando o PDF não tem a coluna anterior)."""
+    from datetime import timedelta
+    d0 = datetime.strptime(ini, "%d/%m/%Y")
+    alvo = f"_{(d0 - timedelta(days=1)).strftime('%Y-%m-%d')}.html"
+    arqs = [f for f in os.listdir(pasta) if re.fullmatch(r"semana-\d{4}-\d{2}-\d{2}_\d{4}-\d{2}-\d{2}\.html", f) and f.endswith(alvo)]
+    if not arqs:
         return None
+    s = open(os.path.join(pasta, arqs[0]), encoding="utf-8").read()
+    m = re.search(r"const D=(\{.*?\});\n", s, re.S)
+    if not m:
+        return None
+    P = json.loads(m.group(1)); K = P["K"]
+    i, f = arqs[0][7:17], arqs[0][18:28]
+    return dict(periodo=f"{i[8:10]}/{i[5:7]} a {f[8:10]}/{f[5:7]}",
+                K={k: K[k] for k in ["litros", "horas", "ton", "lh", "lt"]},
+                frentes=[dict(l=x["l"], lh=x["lh"], lt=x["lt"]) for x in P["frentes"]],
+                frota={str(x["frota"]): x["lh"] for g in P["tabela"] for x in g["linhas"]},
+                horas_oc=K["horas_oc"], pct_oc=K["pct_oc"], rpm_exc=P["rpm"][-1]["v"],
+                rpm_frente={r["l"]: r["b5"] for r in P["rpm_frente"]},
+                oc={r["l"]: r["v"] for r in P["oc_frota"]})
+
+
+def anterior(a, frentes, k, ini=None, pasta=None):
+    """Semana anterior: a coluna do PDF antes da usada e, se houver, o monit dela.
+    Sem coluna anterior no PDF, usa a página da semana anterior já gerada (se existir)."""
+    if not k:
+        return anterior_da_pagina(pasta, ini) if pasta and ini else None
     ini, fim, _, grupos, totais = ler_pdf(a.pdf, frentes, k)
     fr, K = soma_frentes(grupos, totais, frentes)
     ant = dict(periodo=f"{ini[:5]} a {fim[:5]}", K=K, frentes=[dict(l=x["l"], lh=x["lh"], lt=x["lt"]) for x in fr],
@@ -352,7 +377,7 @@ def main():
     rows, fim_dt = ler_monit(a.monit, frentes, ini, fim)
     M = calcular(rows, fim_dt)
 
-    ant = anterior(a, frentes, totais["_k"])
+    ant = anterior(a, frentes, totais["_k"], ini, os.path.dirname(os.path.abspath(a.saida)))
     tab, fr, sem, sem_monit = [], [], [], []
     for f in frentes:
         linhas = []
