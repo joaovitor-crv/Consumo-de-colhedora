@@ -280,7 +280,7 @@ function vpar(id,rows,opt){const box=document.getElementById(id);const W=600,H=1
 function hbars(id,rows,opt){const box=document.getElementById(id);const W=opt.w||300,rh=opt.rh||23,lw=opt.lw||56,H=rows.length*rh+6;
  const s=svg(box,W,H);const max=Math.max(...rows.map(r=>r.v),1e-9);const bwMax=W-lw-opt.vw;
  rows.forEach((r,i)=>{const y=i*rh+3;const w=Math.max(2,bwMax*r.v/max);
-  el('text',{x:lw-8,y:y+rh/2+4,'text-anchor':'end','font-size':opt.fs||12,...(r.onclick?{style:'fill:#2a44a8;text-decoration:underline'}:{})},s,r.l);
+  el('text',{x:lw-8,y:y+rh/2+4,'text-anchor':'end','font-size':opt.fs||12,...(r.onclick?{style:'fill:#2a44a8;text-decoration:underline'}:{})},s,r.t||r.l);
   const rc=el('rect',{x:lw,y:y+4,width:w,height:rh-9,fill:opt.color?opt.color(r,i):'#22378c'},s);hover(rc,box,`${r.l}: ${opt.fmt(r.v)}`);
   el('text',{x:lw+w+6,y:y+rh/2+4,'font-size':opt.fs||12,'font-weight':opt.bold?700:400},s,opt.fmt(r.v));
   if(opt.click)clicavel(s,box,0,y,W,rh,r,opt.click,`${r.l}: ${opt.fmt(r.v)}`);
@@ -430,7 +430,8 @@ hbars('c-rpm',D.rpm,{w:400,vw:62,lw:112,rh:29,fmt:v=>pc(v),bold:true,color:(r,i)
  document.getElementById('leg-rpm').innerHTML=nomes.map((n,k)=>`<span><i style="background:${cores[k]}"></i>${n}</span>`).join('');
  document.getElementById('leg-rpm').style.flexWrap='wrap';
  hbars('c-rpmop',(D.rpm_op||[]).map(r=>({l:nomeCurto(r.l)+maqTxt(r),v:r.v,onclick:()=>maquinas(r.l),dica:'clique para ver as colhedoras, o motor ocioso e o RPM'})),{w:400,vw:56,lw:190,rh:24,fmt:v=>pc(v,1),bold:true,fs:11,color:()=>'#d64550'});
- hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:56,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550',click:eq=>detalhe(eq,'rpm')});
+ const FDE={};(D.tabela||[]).forEach(g=>g.linhas.forEach(x=>FDE[x.frota]=g.grupo.replace('FRENTE ','F')));
+ hbars('c-rpmtop',D.rpm_top.map(r=>({l:r.l,t:FDE[r.l]?`${r.l} · ${FDE[r.l]}`:r.l,v:r.v,h:r.h})),{w:400,vw:62,lw:84,rh:22,fmt:v=>pc(v,1),bold:true,color:()=>'#d64550',click:eq=>detalhe(eq,'rpm')});
 })();
 /* frotas sem Solinftec */
 if((D.sem_monit||[]).length){document.getElementById('card-sem').hidden=false;document.getElementById('sem-n').textContent=D.sem_monit.length+' frotas';
